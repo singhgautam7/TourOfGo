@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/code_colors.dart';
 
+const _noLigatures = <FontFeature>[
+  FontFeature.disable('liga'),
+  FontFeature.disable('calt'),
+];
+
 const Set<String> _keywords = {
   'package', 'import', 'func', 'var', 'const', 'type', 'struct', 'interface',
   'for', 'if', 'else', 'switch', 'case', 'default', 'return', 'go', 'chan',
@@ -137,7 +142,11 @@ class GoSyntaxHighlighter {
   static bool _isAlphaNum(String c) => _isAlpha(c) || _isDigit(c);
 
   static TextSpan _toSpan(_Token tok, bool isDark) {
-    final baseStyle = GoogleFonts.jetBrainsMono(fontSize: 13, height: 1.6);
+    final baseStyle = GoogleFonts.jetBrainsMono(
+      fontSize: 13,
+      height: 1.6,
+      fontFeatures: _noLigatures,
+    );
     switch (tok.type) {
       case _TokType.lineComment:
       case _TokType.blockComment:

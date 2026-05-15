@@ -14,20 +14,29 @@ enum FontSize {
   const FontSize(this.size);
 }
 
-typedef SettingsState = ({ThemeMode themeMode, FontSize fontSize});
+typedef SettingsState = ({
+  ThemeMode themeMode,
+  FontSize fontSize,
+  bool wrapLines,
+});
 
 @riverpod
 class SettingsNotifier extends _$SettingsNotifier {
   @override
   SettingsState build() {
     _loadFromPrefs();
-    return (themeMode: ThemeMode.system, fontSize: FontSize.medium);
+    return (
+      themeMode: ThemeMode.system,
+      fontSize: FontSize.medium,
+      wrapLines: false,
+    );
   }
 
   Future<void> _loadFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     final themeStr = prefs.getString(GoTourPrefs.themeMode) ?? 'system';
     final fontStr = prefs.getString(GoTourPrefs.fontSize) ?? 'medium';
+    final wrap = prefs.getBool(GoTourPrefs.wrapLines) ?? false;
 
     final tm = switch (themeStr) {
       'light' => ThemeMode.light,
@@ -41,11 +50,15 @@ class SettingsNotifier extends _$SettingsNotifier {
       _ => FontSize.medium,
     };
 
-    state = (themeMode: tm, fontSize: fs);
+    state = (themeMode: tm, fontSize: fs, wrapLines: wrap);
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
-    state = (themeMode: mode, fontSize: state.fontSize);
+    state = (
+      themeMode: mode,
+      fontSize: state.fontSize,
+      wrapLines: state.wrapLines,
+    );
     final prefs = await SharedPreferences.getInstance();
     final s = switch (mode) {
       ThemeMode.light => 'light',
@@ -56,7 +69,11 @@ class SettingsNotifier extends _$SettingsNotifier {
   }
 
   Future<void> setFontSize(FontSize size) async {
-    state = (themeMode: state.themeMode, fontSize: size);
+    state = (
+      themeMode: state.themeMode,
+      fontSize: size,
+      wrapLines: state.wrapLines,
+    );
     final prefs = await SharedPreferences.getInstance();
     final s = switch (size) {
       FontSize.small => 'small',
@@ -64,5 +81,15 @@ class SettingsNotifier extends _$SettingsNotifier {
       _ => 'medium',
     };
     await prefs.setString(GoTourPrefs.fontSize, s);
+  }
+
+  Future<void> setWrapLines(bool wrap) async {
+    state = (
+      themeMode: state.themeMode,
+      fontSize: state.fontSize,
+      wrapLines: wrap,
+    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(GoTourPrefs.wrapLines, wrap);
   }
 }

@@ -10,4 +10,5 @@ class GoTourPrefs {
   static const completedJson = 'go_tour_completed';
   static const themeMode = 'go_tour_theme';
   static const fontSize = 'go_tour_font_size';
+  static const wrapLines = 'go_tour_wrap_lines';
 }

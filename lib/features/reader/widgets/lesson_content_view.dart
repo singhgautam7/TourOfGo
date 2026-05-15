@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/html_parser.dart';
+import '../../../providers/settings_provider.dart';
 
-class LessonContentView extends StatelessWidget {
+const _noLigatures = <FontFeature>[
+  FontFeature.disable('liga'),
+  FontFeature.disable('calt'),
+];
+
+class LessonContentView extends ConsumerWidget {
   final List<ContentBlock> blocks;
   final double fontSize;
 
@@ -14,16 +21,20 @@ class LessonContentView extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final wrap = ref.watch(settingsNotifierProvider).wrapLines;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: blocks.map((block) => _buildBlock(block, context, cs)).toList(),
+      children: blocks
+          .map((block) => _buildBlock(block, context, cs, wrap))
+          .toList(),
     );
   }
 
-  Widget _buildBlock(ContentBlock block, BuildContext context, ColorScheme cs) {
+  Widget _buildBlock(
+      ContentBlock block, BuildContext context, ColorScheme cs, bool wrap) {
     if (block is ParagraphBlock) {
       return Padding(
         padding: const EdgeInsets.only(bottom: KuberSpacing.md),
@@ -41,6 +52,15 @@ class LessonContentView extends StatelessWidget {
     }
 
     if (block is CodePreBlock) {
+      final preText = SelectableText(
+        block.code,
+        style: GoogleFonts.jetBrainsMono(
+          fontSize: 12.5,
+          color: cs.onSurface,
+          height: 1.55,
+          fontFeatures: _noLigatures,
+        ),
+      );
       return Container(
         margin: const EdgeInsets.only(bottom: KuberSpacing.md),
         decoration: BoxDecoration(
@@ -48,18 +68,13 @@ class LessonContentView extends StatelessWidget {
           borderRadius: BorderRadius.circular(KuberRadius.md),
           border: Border.all(color: cs.outline),
         ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.all(KuberSpacing.md),
-          child: SelectableText(
-            block.code,
-            style: GoogleFonts.jetBrainsMono(
-              fontSize: 12.5,
-              color: cs.onSurface,
-              height: 1.55,
-            ),
-          ),
-        ),
+        padding: const EdgeInsets.all(KuberSpacing.md),
+        child: wrap
+            ? preText
+            : SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: preText,
+              ),
       );
     }
 

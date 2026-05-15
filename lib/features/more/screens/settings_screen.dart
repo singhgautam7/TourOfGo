@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../providers/settings_provider.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/settings_widgets.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -16,184 +17,230 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(KuberSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: () => context.pop(),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerHigh,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    border: Border.all(color: cs.outline.withValues(alpha: 0.25)),
-                  ),
-                  child: Icon(Icons.arrow_back_rounded, size: 18, color: cs.onSurfaceVariant),
-                ),
-              ),
-              const SizedBox(height: KuberSpacing.lg),
-              Text(
-                'Appearance',
-                style: GoogleFonts.inter(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface,
-                  letterSpacing: -0.6,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Theme and reading preferences.',
-                style: GoogleFonts.inter(fontSize: 13, color: cs.onSurfaceVariant),
-              ),
-              const SizedBox(height: KuberSpacing.xl),
-
-              // Theme selector
-              _SettingsLabel(label: 'THEME', cs: cs),
-              _SettingsCard(
-                cs: cs,
-                child: Column(
-                  children: ThemeMode.values.map((mode) {
-                    final selected = settings.themeMode == mode;
-                    return _SelectorRow(
-                      label: switch (mode) {
-                        ThemeMode.system => 'System',
-                        ThemeMode.light => 'Light',
-                        ThemeMode.dark => 'Dark',
-                      },
-                      icon: switch (mode) {
-                        ThemeMode.system => Icons.brightness_auto_rounded,
-                        ThemeMode.light => Icons.light_mode_outlined,
-                        ThemeMode.dark => Icons.dark_mode_outlined,
-                      },
-                      selected: selected,
-                      onTap: () => notifier.setThemeMode(mode),
-                      cs: cs,
-                    );
-                  }).toList(),
-                ),
-              ),
-
-              const SizedBox(height: KuberSpacing.lg),
-
-              // Font size selector
-              _SettingsLabel(label: 'FONT SIZE', cs: cs),
-              _SettingsCard(
-                cs: cs,
-                child: Column(
-                  children: FontSize.values.map((size) {
-                    final selected = settings.fontSize == size;
-                    return _SelectorRow(
-                      label: switch (size) {
-                        FontSize.small => 'Small',
-                        FontSize.medium => 'Medium',
-                        FontSize.large => 'Large',
-                      },
-                      icon: Icons.text_fields_rounded,
-                      selected: selected,
-                      onTap: () => notifier.setFontSize(size),
-                      cs: cs,
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
+      body: CustomScrollView(
+        slivers: [
+          const SliverToBoxAdapter(
+            child: KuberAppBar(showBack: true, title: ''),
           ),
-        ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'App\nSettings',
+                    style: GoogleFonts.inter(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w800,
+                      color: cs.onSurface,
+                      height: 1.15,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Customize your experience and preferences.',
+                    style: GoogleFonts.inter(
+                      fontSize: 13,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(
+                KuberSpacing.lg, 0, KuberSpacing.lg, KuberSpacing.xxl),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                // ── APPEARANCE ──────────────────────────────────────────
+                const SettingsSectionLabel(label: 'APPEARANCE'),
+                const SizedBox(height: KuberSpacing.sm),
+                SettingsCard(
+                  children: [
+                    _TileBlock(
+                      icon: Icons.palette_outlined,
+                      title: 'Theme',
+                      child: SettingsCardSelector<ThemeMode>(
+                        options: const [
+                          SelectorOption(
+                            value: ThemeMode.light,
+                            label: 'LIGHT',
+                            icon: Icons.light_mode_outlined,
+                          ),
+                          SelectorOption(
+                            value: ThemeMode.dark,
+                            label: 'DARK',
+                            icon: Icons.dark_mode_outlined,
+                          ),
+                          SelectorOption(
+                            value: ThemeMode.system,
+                            label: 'SYSTEM',
+                            icon: Icons.settings_brightness_outlined,
+                          ),
+                        ],
+                        selectedValue: settings.themeMode,
+                        onSelected: notifier.setThemeMode,
+                      ),
+                    ),
+                    Divider(height: 1, color: cs.outline),
+                    _TileBlock(
+                      icon: Icons.text_fields_rounded,
+                      title: 'Font size',
+                      child: SettingsCardSelector<FontSize>(
+                        options: const [
+                          SelectorOption(
+                            value: FontSize.small,
+                            label: 'SMALL',
+                            icon: Icons.text_decrease_rounded,
+                          ),
+                          SelectorOption(
+                            value: FontSize.medium,
+                            label: 'MEDIUM',
+                            icon: Icons.text_fields_rounded,
+                          ),
+                          SelectorOption(
+                            value: FontSize.large,
+                            label: 'LARGE',
+                            icon: Icons.text_increase_rounded,
+                          ),
+                        ],
+                        selectedValue: settings.fontSize,
+                        onSelected: notifier.setFontSize,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: KuberSpacing.xl),
+
+                // ── CODE ────────────────────────────────────────────────
+                const SettingsSectionLabel(label: 'CODE'),
+                const SizedBox(height: KuberSpacing.sm),
+                SettingsCard(
+                  children: [
+                    _SwitchRow(
+                      icon: Icons.wrap_text_rounded,
+                      label: 'Wrap code lines',
+                      subtitle:
+                          'Wrap long lines in code viewers and the sandbox instead of horizontal scroll.',
+                      value: settings.wrapLines,
+                      onChanged: notifier.setWrapLines,
+                    ),
+                  ],
+                ),
+              ]),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _SettingsLabel extends StatelessWidget {
-  final String label;
-  final ColorScheme cs;
-  const _SettingsLabel({required this.label, required this.cs});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8, left: 2),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: cs.onSurfaceVariant,
-          letterSpacing: 1.3,
-        ),
-      ),
-    );
-  }
-}
-
-class _SettingsCard extends StatelessWidget {
-  final Widget child;
-  final ColorScheme cs;
-  const _SettingsCard({required this.child, required this.cs});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
-      ),
-      child: child,
-    );
-  }
-}
-
-class _SelectorRow extends StatelessWidget {
-  final String label;
+class _TileBlock extends StatelessWidget {
   final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-  final ColorScheme cs;
+  final String title;
+  final Widget child;
 
-  const _SelectorRow({
-    required this.label,
+  const _TileBlock({
     required this.icon,
-    required this.selected,
-    required this.onTap,
-    required this.cs,
+    required this.title,
+    required this.child,
   });
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: KuberSpacing.lg,
+        vertical: KuberSpacing.md,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              SquircleIcon(icon: icon, size: 18, padding: 8),
+              const SizedBox(width: KuberSpacing.md),
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: KuberSpacing.md),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _SwitchRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  const _SwitchRow({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
+      behavior: HitTestBehavior.opaque,
+      onTap: () => onChanged(!value),
+      child: Padding(
         padding: const EdgeInsets.symmetric(
-            horizontal: KuberSpacing.md, vertical: KuberSpacing.md),
-        decoration: BoxDecoration(
-          color: selected ? cs.primary.withValues(alpha: 0.08) : Colors.transparent,
+          horizontal: KuberSpacing.lg,
+          vertical: KuberSpacing.md,
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 18,
-              color: selected ? cs.primary : cs.onSurfaceVariant,
-            ),
-            const SizedBox(width: 12),
+            SquircleIcon(icon: icon, size: 18, padding: 8),
+            const SizedBox(width: KuberSpacing.md),
             Expanded(
-              child: Text(
-                label,
-                style: GoogleFonts.inter(
-                  fontSize: 14.5,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                  color: selected ? cs.primary : cs.onSurface,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: cs.onSurfaceVariant,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
               ),
             ),
-            if (selected)
-              Icon(Icons.check_rounded, size: 16, color: cs.primary),
+            Switch(
+              value: value,
+              onChanged: onChanged,
+            ),
           ],
         ),
       ),

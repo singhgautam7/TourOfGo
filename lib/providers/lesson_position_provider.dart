@@ -12,12 +12,13 @@ class LessonPositionNotifier extends _$LessonPositionNotifier {
   @override
   LessonPosition build() {
     _loadFromPrefs();
-    return (chapterKey: 'basics', lessonIndex: 0);
+    return (chapterKey: kChapterOrder.first, lessonIndex: 0);
   }
 
   Future<void> _loadFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-    final key = prefs.getString(GoTourPrefs.currentChapterKey) ?? 'basics';
+    final key =
+        prefs.getString(GoTourPrefs.currentChapterKey) ?? kChapterOrder.first;
     final idx = int.tryParse(
           prefs.getString(GoTourPrefs.currentLessonIdx) ?? '0',
         ) ??

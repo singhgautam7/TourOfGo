@@ -65,9 +65,9 @@ class MoreScreen extends ConsumerWidget {
                 title: 'PREFERENCES',
                 items: [
                   _MenuItem(
-                    icon: Icons.palette_outlined,
-                    label: 'Appearance',
-                    subtitle: 'Theme and font size',
+                    icon: Icons.settings_outlined,
+                    label: 'Settings',
+                    subtitle: 'Theme, font size, code preferences',
                     onTap: () => context.push('/more/settings'),
                     cs: cs,
                   ),
@@ -188,6 +188,7 @@ class _MenuItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(

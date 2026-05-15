@@ -68,8 +68,20 @@ class GoHtmlParser {
         final extracted = _extractTag(remaining, 'p');
         if (extracted != null) {
           remaining = extracted.$2;
-          final spans = _parseInline(extracted.$1);
-          if (spans.isNotEmpty) blocks.add(ParagraphBlock(spans));
+          final inner = extracted.$1.trim();
+          // A paragraph that is just a single <code>…</code> block is
+          // really a code sample on the web — promote it to a code block.
+          final codeOnly = RegExp(r'^<code[^>]*>([\s\S]*?)</code>$')
+              .firstMatch(inner);
+          if (codeOnly != null) {
+            blocks.add(CodePreBlock(
+                decodeEntities(_stripTags(codeOnly.group(1)!))));
+          } else {
+            final spans = _parseInline(extracted.$1);
+            if (_hasMeaningfulContent(spans)) {
+              blocks.add(ParagraphBlock(spans));
+            }
+          }
         } else {
           remaining = remaining.substring(1);
         }
@@ -120,8 +132,25 @@ class GoHtmlParser {
     return blocks;
   }
 
+  bool _hasMeaningfulContent(List<InlineSpan> spans) {
+    return spans.any((s) =>
+        s is WidgetSpan ||
+        (s is TextSpan && (s.text ?? '').trim().isNotEmpty));
+  }
+
   bool _matchTag(String s, String tag) {
-    return s.startsWith('<$tag') || s.startsWith('<$tag>');
+    // Must start with `<tag` followed by a non-name character (space, >, /).
+    // Without this guard, `<pre>` would also match tag `p`.
+    if (!s.startsWith('<$tag')) return false;
+    if (s.length == tag.length + 1) return false;
+    final next = s.codeUnitAt(tag.length + 1);
+    // 0x20 space, 0x09 tab, 0x0A LF, 0x0D CR, 0x2F '/', 0x3E '>'
+    return next == 0x20 ||
+        next == 0x09 ||
+        next == 0x0A ||
+        next == 0x0D ||
+        next == 0x2F ||
+        next == 0x3E;
   }
 
   String _skipTag(String s, String tag) {
@@ -162,13 +191,14 @@ class GoHtmlParser {
 
     while (html.isNotEmpty) {
       if (!html.contains('<')) {
-        spans.add(TextSpan(text: decodeEntities(html)));
+        spans.add(TextSpan(text: _collapseWs(decodeEntities(html))));
         break;
       }
 
       final tagStart = html.indexOf('<');
       if (tagStart > 0) {
-        spans.add(TextSpan(text: decodeEntities(html.substring(0, tagStart))));
+        spans.add(TextSpan(
+            text: _collapseWs(decodeEntities(html.substring(0, tagStart)))));
         html = html.substring(tagStart);
         continue;
       }
@@ -224,7 +254,10 @@ class GoHtmlParser {
                 border: Border.all(color: cs.outline),
               ),
               child: Text(
-                decodeEntities(_stripTags(ex.$1)),
+                decodeEntities(_stripTags(ex.$1)).replaceAll(' ', ' '),
+                softWrap: false,
+                maxLines: 1,
+                overflow: TextOverflow.visible,
                 style: TextStyle(
                   fontFamily: 'JetBrains Mono',
                   fontSize: 12,
@@ -282,4 +315,6 @@ class GoHtmlParser {
   }
 
   String _stripTags(String s) => s.replaceAll(RegExp(r'<[^>]*>'), '');
+
+  String _collapseWs(String s) => s.replaceAll(RegExp(r'\s+'), ' ');
 }

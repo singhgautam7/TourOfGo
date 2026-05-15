@@ -78,7 +78,6 @@ class _LessonDots extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Show up to 7 dots; with ellipsis for larger sets
     const maxDots = 7;
 
     if (total <= maxDots) {
@@ -88,21 +87,22 @@ class _LessonDots extends StatelessWidget {
       );
     }
 
-    // Complex case: show a window around current
-    final List<Widget> dots = [];
-    int start = (current - 2).clamp(0, total - maxDots);
-    int end = (start + maxDots - 1).clamp(0, total - 1);
-
-    if (start > 0) {
-      dots.add(_ellipsis(cs));
-    }
-    for (int i = start; i <= end; i++) {
-      dots.add(_dot(i, current, cs));
-    }
-    if (end < total - 1) {
-      dots.add(_ellipsis(cs));
-    }
-    return Row(mainAxisSize: MainAxisSize.min, children: dots);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(KuberRadius.full),
+        border: Border.all(color: cs.outline),
+      ),
+      child: Text(
+        '${current + 1} / $total',
+        style: GoogleFonts.jetBrainsMono(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: cs.onSurfaceVariant,
+        ),
+      ),
+    );
   }
 
   Widget _dot(int idx, int current, ColorScheme cs) {
@@ -119,13 +119,4 @@ class _LessonDots extends StatelessWidget {
     );
   }
 
-  Widget _ellipsis(ColorScheme cs) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      child: Text(
-        '…',
-        style: TextStyle(color: cs.onSurfaceVariant, fontSize: 10),
-      ),
-    );
-  }
 }

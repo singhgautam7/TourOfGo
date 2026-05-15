@@ -10,9 +10,8 @@ import '../../../providers/tour_content_provider.dart';
 import '../../../providers/lesson_position_provider.dart';
 import '../../../providers/progress_provider.dart';
 import '../widgets/continue_card.dart';
-import '../widgets/chapter_progress_row.dart';
 import '../widgets/refresh_button.dart';
-import '../../navigation/widgets/chapter_nav_sheet.dart';
+import '../../navigation/widgets/chapter_browser_list.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -34,24 +33,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _loadLastFetch() async {
     final ms = await _service.getLastFetchTime();
     if (mounted) setState(() => _lastFetchMs = ms);
-  }
-
-  void _openChapterNav() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      useRootNavigator: true,
-      builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.55,
-        minChildSize: 0.15,
-        maxChildSize: 0.95,
-        snap: true,
-        snapSizes: const [0.15, 0.55, 0.95],
-        builder: (ctx, scrollController) =>
-            ChapterNavSheetContent(scrollController: scrollController),
-      ),
-    );
   }
 
   void _showApiInfoSheet() {
@@ -106,7 +87,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   BorderRadius.circular(KuberRadius.md),
                               border: Border.all(color: cs.outline),
                             ),
-                            child: Icon(Icons.more_vert_rounded,
+                            child: Icon(Icons.tune_rounded,
                                 size: 18, color: cs.onSurfaceVariant),
                           ),
                         ),
@@ -198,38 +179,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: KuberSpacing.md),
-
-                    // Browse chapters button
-                    GestureDetector(
-                      onTap: _openChapterNav,
-                      child: Container(
-                        width: double.infinity,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: cs.surfaceContainer,
-                          borderRadius: BorderRadius.circular(KuberRadius.md),
-                          border: Border.all(color: cs.outline),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.menu_rounded,
-                                size: 16, color: cs.onSurfaceVariant),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Browse chapters',
-                              style: GoogleFonts.inter(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: cs.onSurface,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
                     const SizedBox(height: KuberSpacing.lg),
 
                     // Your progress section
@@ -259,10 +208,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _openChapterNav,
-        icon: const Icon(Icons.menu_book_rounded),
-        label: const Text('Browse'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        onPressed: () => context.push('/sandbox'),
+        icon: const Icon(Icons.code_rounded),
+        label: const Text('Sandbox'),
+        backgroundColor: cs.primary,
         foregroundColor: Colors.white,
       ),
     );
@@ -279,7 +228,6 @@ class _ProgressSection extends ConsumerWidget {
     ref.watch(progressNotifierProvider);
     final overall = ref.read(progressNotifierProvider.notifier)
         .overallProgress(content);
-    final ordered = orderedChapters(content);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,15 +247,27 @@ class _ProgressSection extends ConsumerWidget {
               ),
             ),
             Text(
-              '${(overall * 100).round()}% complete',
+              overall == 0
+                  ? 'No progress yet'
+                  : '${(overall * 100).round()}% complete',
               style: GoogleFonts.jetBrainsMono(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: cs.primary,
+                color: overall == 0 ? cs.onSurfaceVariant : cs.primary,
               ),
             ),
           ],
         ),
+        if (overall == 0) ...[
+          const SizedBox(height: 4),
+          Text(
+            'Start learning to track your progress.',
+            style: GoogleFonts.inter(
+              fontSize: 12.5,
+              color: cs.onSurfaceVariant,
+            ),
+          ),
+        ],
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
@@ -315,17 +275,11 @@ class _ProgressSection extends ConsumerWidget {
             borderRadius: BorderRadius.circular(KuberRadius.md),
             border: Border.all(color: cs.outline),
           ),
-          child: Column(
-            children: ordered.asMap().entries.map((e) {
-              final idx = e.key;
-              final entry = e.value;
-              return ChapterProgressRow(
-                chapterNum: idx + 1,
-                chapterKey: entry.key,
-                chapter: entry.value,
-                showDivider: idx < ordered.length - 1,
-              );
-            }).toList(),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: ChapterBrowserList(
+            content: content,
+            useListView: false,
+            autoExpandCurrent: false,
           ),
         ),
       ],

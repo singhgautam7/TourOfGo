@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/tour_url.dart';
+import '../../../shared/widgets/kuber_bottom_sheet.dart';
 
 /// Resolves a relative href to an absolute URL.
 String resolveHref(String href) {
@@ -20,6 +23,8 @@ void onLinkTap(BuildContext context, String href) {
   showModalBottomSheet(
     context: context,
     useRootNavigator: true,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
     builder: (_) => LinkBottomSheet(url: url),
   );
 }
@@ -31,74 +36,77 @@ class LinkBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final inAppPos = tourUrlToPosition(url);
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(KuberSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: cs.onSurfaceVariant.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: KuberSpacing.xl),
-            Text(
-              'External Link',
-              style: GoogleFonts.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: cs.onSurface,
-              ),
-            ),
-            const SizedBox(height: KuberSpacing.md),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(KuberSpacing.md),
-              decoration: BoxDecoration(
-                color: cs.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                border: Border.all(color: cs.outline),
-              ),
-              child: Text(
-                url,
-                style: GoogleFonts.jetBrainsMono(
-                  fontSize: 12,
-                  color: cs.primary,
-                ),
-              ),
-            ),
-            const SizedBox(height: KuberSpacing.lg),
+    return KuberBottomSheet(
+      title: 'External Link',
+      actions: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (inAppPos != null) ...[
             SizedBox(
               width: double.infinity,
-              child: FilledButton(
+              child: FilledButton.icon(
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                  context.push('/reader', extra: inAppPos);
+                },
+                icon: const Icon(Icons.menu_book_rounded, size: 18),
+                label: const Text('Open in app'),
+              ),
+            ),
+            const SizedBox(height: KuberSpacing.sm),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
                 onPressed: () async {
                   final uri = Uri.tryParse(url);
                   if (uri != null && await canLaunchUrl(uri)) {
                     await launchUrl(uri,
                         mode: LaunchMode.externalApplication);
                   }
-                  if (context.mounted) Navigator.pop(context);
+                  if (context.mounted) {
+                    Navigator.of(context, rootNavigator: true).pop();
+                  }
                 },
-                child: const Text('Open in Browser'),
+                icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                label: const Text('Open in browser'),
               ),
             ),
-            const SizedBox(height: KuberSpacing.sm),
+          ] else
             SizedBox(
               width: double.infinity,
-              child: TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
+              child: FilledButton.icon(
+                onPressed: () async {
+                  final uri = Uri.tryParse(url);
+                  if (uri != null && await canLaunchUrl(uri)) {
+                    await launchUrl(uri,
+                        mode: LaunchMode.externalApplication);
+                  }
+                  if (context.mounted) {
+                    Navigator.of(context, rootNavigator: true).pop();
+                  }
+                },
+                icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                label: const Text('Open in browser'),
               ),
             ),
-          ],
+        ],
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(KuberSpacing.md),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          border: Border.all(color: cs.outline),
+        ),
+        child: Text(
+          url,
+          style: GoogleFonts.jetBrainsMono(
+            fontSize: 12,
+            color: cs.primary,
+          ),
         ),
       ),
     );

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/tour_models.dart';
 import '../../../providers/lesson_position_provider.dart';
+import '../../../providers/progress_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ContinueCard extends ConsumerWidget {
@@ -30,18 +31,27 @@ class ContinueCard extends ConsumerWidget {
     final lessonNum = position.lessonIndex + 1;
     final pct = lessonNum / totalLessons;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border(
-          left: BorderSide(color: cs.primary, width: 4),
-          top: BorderSide(color: cs.outline),
-          right: BorderSide(color: cs.outline),
-          bottom: BorderSide(color: cs.outline),
+    ref.watch(progressNotifierProvider);
+    final overall = ref
+        .read(progressNotifierProvider.notifier)
+        .overallProgress(content);
+    final isFreshStart = overall == 0 &&
+        position.chapterKey == kChapterOrder.first &&
+        position.lessonIndex == 0;
+
+    if (isFreshStart) {
+      return _AccentedCard(
+        cs: cs,
+        child: _EmptyVariantBody(
+          content: content,
+          onStart: onContinue,
+          cs: cs,
         ),
-      ),
-      padding: const EdgeInsets.all(KuberSpacing.lg),
+      );
+    }
+
+    return _AccentedCard(
+      cs: cs,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -74,7 +84,6 @@ class ContinueCard extends ConsumerWidget {
               ),
             ),
           const SizedBox(height: 12),
-          // Progress bar
           ClipRRect(
             borderRadius: BorderRadius.circular(KuberRadius.full),
             child: LinearProgressIndicator(
@@ -121,6 +130,131 @@ class ContinueCard extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _AccentedCard extends StatelessWidget {
+  final Widget child;
+  final ColorScheme cs;
+  const _AccentedCard({required this.child, required this.cs});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(KuberRadius.md),
+      child: Container(
+        decoration: BoxDecoration(
+          color: cs.surfaceContainer,
+          border: Border.all(color: cs.outline),
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(width: 4, color: cs.primary),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(KuberSpacing.lg),
+                  child: child,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyVariantBody extends StatelessWidget {
+  final Map<String, ChapterData> content;
+  final VoidCallback onStart;
+  final ColorScheme cs;
+
+  const _EmptyVariantBody({
+    required this.content,
+    required this.onStart,
+    required this.cs,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final totalChapters = content.length;
+    final totalLessons =
+        content.values.fold<int>(0, (a, ch) => a + ch.pages.length);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: cs.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(KuberRadius.md),
+                border:
+                    Border.all(color: cs.primary.withValues(alpha: 0.3)),
+              ),
+              child: Icon(Icons.flag_outlined,
+                  color: cs.primary, size: 22),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Start your Go journey',
+                    style: GoogleFonts.inter(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: cs.onSurface,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '$totalChapters chapters · $totalLessons lessons',
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 11,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: onStart,
+            icon: const SizedBox.shrink(),
+            label: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Begin first lesson',
+                  style: GoogleFonts.inter(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                const Icon(Icons.arrow_forward_rounded, size: 16),
+              ],
+            ),
+            style: FilledButton.styleFrom(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
