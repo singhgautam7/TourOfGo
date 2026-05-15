@@ -11,4 +11,5 @@ class GoTourPrefs {
   static const themeMode = 'go_tour_theme';
   static const fontSize = 'go_tour_font_size';
   static const wrapLines = 'go_tour_wrap_lines';
+  static const recentSearches = 'go_tour_recent_searches';
 }

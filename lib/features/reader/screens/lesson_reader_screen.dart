@@ -397,27 +397,48 @@ class _ReaderTopBar extends StatelessWidget {
                   ),
                   const SizedBox(width: KuberSpacing.sm),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          chapterName,
-                          style: GoogleFonts.inter(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w700,
-                            color: cs.onSurface,
-                            letterSpacing: -0.2,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => showChapterNavSheet(
+                        context,
+                        initialChapterKey: chapterKey,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  chapterName,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: cs.primary,
+                                    letterSpacing: -0.2,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              Icon(
+                                Icons.expand_more_rounded,
+                                size: 14,
+                                color: cs.primary,
+                              ),
+                            ],
                           ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          'Lesson ${lessonIndex + 1} of $totalLessons',
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 11,
-                            color: cs.onSurfaceVariant,
+                          Text(
+                            'Lesson ${lessonIndex + 1} of $totalLessons',
+                            style: GoogleFonts.jetBrainsMono(
+                              fontSize: 11,
+                              color: cs.onSurfaceVariant,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(width: KuberSpacing.sm),

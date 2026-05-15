@@ -5,12 +5,39 @@ import '../../../core/theme/app_theme.dart';
 import '../../../providers/tour_content_provider.dart';
 import 'chapter_browser_list.dart';
 
+/// Opens the chapter navigation bottom sheet. Optionally [initialChapterKey]
+/// pre-expands a chapter and scrolls the list to it.
+Future<void> showChapterNavSheet(
+  BuildContext context, {
+  String? initialChapterKey,
+}) {
+  return showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    useRootNavigator: true,
+    builder: (_) => DraggableScrollableSheet(
+      initialChildSize: 0.55,
+      minChildSize: 0.15,
+      maxChildSize: 0.95,
+      snap: true,
+      snapSizes: const [0.15, 0.55, 0.95],
+      builder: (ctx, scrollController) => ChapterNavSheetContent(
+        scrollController: scrollController,
+        initialChapterKey: initialChapterKey,
+      ),
+    ),
+  );
+}
+
 class ChapterNavSheetContent extends ConsumerStatefulWidget {
   final ScrollController scrollController;
+  final String? initialChapterKey;
 
   const ChapterNavSheetContent({
     super.key,
     required this.scrollController,
+    this.initialChapterKey,
   });
 
   @override
@@ -123,6 +150,7 @@ class _ChapterNavSheetContentState
                 filter: _search,
                 scrollController: widget.scrollController,
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                initialExpandedChapterKey: widget.initialChapterKey,
                 onLessonTapped: () => Navigator.pop(context),
               ),
             ),

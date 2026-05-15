@@ -1,26 +1,27 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'settings_provider.dart';
+part of 'recent_searches_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$settingsNotifierHash() => r'06f49c3c3d88d4f9be4e81d17ebddbd23e3cf65a';
+String _$recentSearchesNotifierHash() =>
+    r'5c036f464da0271f568f5f80c91c79bb36cef924';
 
-/// See also [SettingsNotifier].
-@ProviderFor(SettingsNotifier)
-final settingsNotifierProvider =
-    AutoDisposeNotifierProvider<SettingsNotifier, SettingsState>.internal(
-      SettingsNotifier.new,
-      name: r'settingsNotifierProvider',
+/// See also [RecentSearchesNotifier].
+@ProviderFor(RecentSearchesNotifier)
+final recentSearchesNotifierProvider =
+    AutoDisposeNotifierProvider<RecentSearchesNotifier, List<String>>.internal(
+      RecentSearchesNotifier.new,
+      name: r'recentSearchesNotifierProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$settingsNotifierHash,
+          : _$recentSearchesNotifierHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$SettingsNotifier = AutoDisposeNotifier<SettingsState>;
+typedef _$RecentSearchesNotifier = AutoDisposeNotifier<List<String>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

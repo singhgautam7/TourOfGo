@@ -141,6 +141,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                       const SizedBox(height: KuberSpacing.lg),
 
+                      // Search entry point
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => context.push('/search'),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: KuberSpacing.lg,
+                              vertical: KuberSpacing.md),
+                          decoration: BoxDecoration(
+                            color: cs.surfaceContainer,
+                            borderRadius:
+                                BorderRadius.circular(KuberRadius.md),
+                            border: Border.all(color: cs.outline),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.search_rounded,
+                                  color: cs.onSurfaceVariant, size: 18),
+                              const SizedBox(width: KuberSpacing.md),
+                              Text(
+                                'Search chapters and lessons...',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: KuberSpacing.lg),
+
                       // Your progress section
                       contentState.maybeWhen(
                         data: (content) => _ProgressSection(content: content),

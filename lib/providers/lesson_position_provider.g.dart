@@ -7,7 +7,7 @@ part of 'lesson_position_provider.dart';
 // **************************************************************************
 
 String _$lessonPositionNotifierHash() =>
-    r'0cb2ad0ff4193d5fe4c41b556148bd0807f68d3c';
+    r'99200a52c739ebc9d6cc647ee5592742b0ae2b22';
 
 /// See also [LessonPositionNotifier].
 @ProviderFor(LessonPositionNotifier)

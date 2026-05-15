@@ -16,6 +16,7 @@ class ChapterBrowserList extends ConsumerStatefulWidget {
   final ScrollController? scrollController;
   final EdgeInsetsGeometry padding;
   final bool autoExpandCurrent;
+  final String? initialExpandedChapterKey;
   final VoidCallback? onLessonTapped;
 
   const ChapterBrowserList({
@@ -26,6 +27,7 @@ class ChapterBrowserList extends ConsumerStatefulWidget {
     this.scrollController,
     this.padding = EdgeInsets.zero,
     this.autoExpandCurrent = true,
+    this.initialExpandedChapterKey,
     this.onLessonTapped,
   });
 
@@ -40,10 +42,30 @@ class _ChapterBrowserListState extends ConsumerState<ChapterBrowserList> {
   @override
   void initState() {
     super.initState();
-    if (widget.autoExpandCurrent) {
+    if (widget.initialExpandedChapterKey != null) {
+      _expanded.add(widget.initialExpandedChapterKey!);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToChapter(widget.initialExpandedChapterKey!);
+      });
+    } else if (widget.autoExpandCurrent) {
       final pos = ref.read(lessonPositionNotifierProvider);
       _expanded.add(pos.chapterKey);
     }
+  }
+
+  void _scrollToChapter(String chapterKey) {
+    final controller = widget.scrollController;
+    if (controller == null || !controller.hasClients) return;
+    final idx = kChapterOrder.indexOf(chapterKey);
+    if (idx <= 0) return;
+    // Approximate collapsed row height; good enough for "scroll near it".
+    final offset = (idx * 72.0)
+        .clamp(0.0, controller.position.maxScrollExtent);
+    controller.animateTo(
+      offset,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
   }
 
   void _onLessonTap(String chapterKey, int lessonIdx) async {
