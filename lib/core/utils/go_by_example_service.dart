@@ -131,32 +131,14 @@ class GoByExampleService {
         .trim();
   }
 
-  /// Extracts code text from a code cell, preserving newlines between
-  /// `<span class="line">` boundaries.
+  /// Extracts code text from a code cell, preserving newlines naturally.
   static String _extractCode(String html) {
-    // First, normalise the per-line wrapper into newlines. The closing of
-    // one logical line and the opening of the next looks like:
-    //   </span></span>\n<span class="line"><span class="cl">
-    // We collapse that boundary into a single `\n`.
-    var text = html.replaceAll(
-      RegExp(r'</span>\s*</span>\s*<span class="line">\s*<span class="cl">'),
-      '\n',
-    );
-    // Drop the opening line/cl spans at the very start.
-    text = text.replaceAll(
-      RegExp(r'<span class="line">\s*<span class="cl">'),
-      '',
-    );
-    // Drop the trailing closing wrappers.
-    text = text.replaceAll(RegExp(r'</span>\s*</span>\s*$'), '');
-    // Convert hard line breaks if any slipped through.
-    text = text
-        .replaceAll('<br>', '\n')
-        .replaceAll('<br/>', '\n')
-        .replaceAll('<br />', '\n');
-    // Strip remaining spans / tags.
-    text = text.replaceAll(RegExp(r'<[^>]*>'), '');
-    return _decodeEntities(text);
+    final match = RegExp(r'<code>([\s\S]*?)</code>').firstMatch(html);
+    if (match == null) return '';
+    // Chroma generates newlines inside the span for each line, so stripping
+    // HTML tags leaves the text with exact formatting and no leading spaces.
+    final text = match.group(1)!.replaceAll(RegExp(r'<[^>]*>'), '');
+    return _decodeEntities(text).trim();
   }
 
   static String _decodeEntities(String s) => s

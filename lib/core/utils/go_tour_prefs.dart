@@ -15,7 +15,7 @@ class GoTourPrefs {
 
   // Go by Example
   static const gbeIndexJson = 'gbe_index_json';
-  static const gbeExamplePrefix = 'gbe_example_'; // + slug
+  static const gbeExamplePrefix = 'gbe_example_v2_'; // + slug
   static const gbeIndexLoaded = 'gbe_index_loaded';
   static const gbeCompleted = 'gbe_completed_json';
 }
