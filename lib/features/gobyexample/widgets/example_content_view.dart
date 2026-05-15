@@ -46,17 +46,18 @@ class ExampleContentView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: KuberSpacing.lg),
-            for (int i = 0; i < example.segments.length; i++) ...[
-              _ExampleSegmentView(
-                segment: example.segments[i],
-                index: i + 1,
-              ),
-              const SizedBox(height: KuberSpacing.lg),
-            ],
-            if (example.shellOutput.isNotEmpty) ...[
-              const SizedBox(height: KuberSpacing.sm),
-              _ShellOutputCard(output: example.shellOutput),
-            ],
+            _CombinedExampleView(
+              code: example.segments
+                  .map((s) => s.code)
+                  .where((c) => c.isNotEmpty)
+                  .join('\n\n'),
+              output: example.shellOutput,
+              text: example.segments
+                  .map((s) => s.annotation)
+                  .where((a) => a.isNotEmpty)
+                  .join('\n\n'),
+              filename: '${example.slug}.go',
+            ),
             const SizedBox(height: KuberSpacing.xxl),
           ],
         ),
@@ -65,11 +66,18 @@ class ExampleContentView extends StatelessWidget {
   }
 }
 
-class _ExampleSegmentView extends ConsumerWidget {
-  final ExampleSegment segment;
-  final int index;
+class _CombinedExampleView extends ConsumerWidget {
+  final String code;
+  final String output;
+  final String text;
+  final String filename;
 
-  const _ExampleSegmentView({required this.segment, required this.index});
+  const _CombinedExampleView({
+    required this.code,
+    required this.output,
+    required this.text,
+    required this.filename,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -89,32 +97,20 @@ class _ExampleSegmentView extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (segment.annotation.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(bottom: KuberSpacing.sm),
-            child: Text(
-              segment.annotation,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                color: cs.onSurface,
-                height: 1.6,
-              ),
-            ),
-          ),
-        if (segment.code.isNotEmpty)
+        if (code.isNotEmpty) ...[
           CodeCardChrome(
-            filename: 'snippet $index',
+            filename: filename,
             body: Padding(
               padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
               child: LineNumberedCode(
-                text: segment.code,
+                text: code,
                 codeStyle: codeStyle,
                 wrap: wrap,
                 bodyBuilder: (context, maxWidth) {
                   final body = SelectableText.rich(
                     TextSpan(
                       children: GoSyntaxHighlighter.highlight(
-                        segment.code,
+                        code,
                         isDark: isDark,
                       ),
                     ),
@@ -127,6 +123,21 @@ class _ExampleSegmentView extends ConsumerWidget {
                   );
                 },
               ),
+            ),
+          ),
+          const SizedBox(height: KuberSpacing.lg),
+        ],
+        if (output.isNotEmpty) ...[
+          _ShellOutputCard(output: output),
+          const SizedBox(height: KuberSpacing.lg),
+        ],
+        if (text.isNotEmpty)
+          Text(
+            text,
+            style: GoogleFonts.inter(
+              fontSize: 14.5,
+              color: cs.onSurface,
+              height: 1.6,
             ),
           ),
       ],

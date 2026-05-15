@@ -101,7 +101,9 @@ class GoByExampleService {
 
     String shellOutput = '';
     if (shellIdx != null) {
-      shellOutput = _extractCode(allCells[shellIdx].codeHtml);
+      shellOutput = _extractCode(allCells[shellIdx].codeHtml)
+          .trim()
+          .replaceAll(RegExp(r'\n{3,}'), '\n\n');
     }
 
     final segments = <ExampleSegment>[];
@@ -164,7 +166,13 @@ class GoByExampleService {
       .replaceAll('&quot;', '"')
       .replaceAll('&#39;', "'")
       .replaceAll('&#34;', '"')
-      .replaceAll('&nbsp;', ' ');
+      .replaceAll('&nbsp;', ' ')
+      .replaceAll('&ldquo;', '"')
+      .replaceAll('&rdquo;', '"')
+      .replaceAll('&rsquo;', "'")
+      .replaceAll('&lsquo;', "'")
+      .replaceAll('&mdash;', '—')
+      .replaceAll('&ndash;', '–');
 }
 
 class _RawRow {
