@@ -76,7 +76,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           _GoMarkWidget(cs: cs),
                           const SizedBox(width: 10),
                           Text(
-                            'Tour of Go',
+                            'A Tour of Go',
                             style: GoogleFonts.inter(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
@@ -279,16 +279,13 @@ class _GoMarkWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.3)),
-      ),
-      child: Center(
-        child: Icon(Icons.circle_outlined, color: cs.primary, size: 18),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(KuberRadius.md),
+      child: Image.asset(
+        'assets/go_brand.png',
+        width: 32,
+        height: 32,
+        fit: BoxFit.cover,
       ),
     );
   }
