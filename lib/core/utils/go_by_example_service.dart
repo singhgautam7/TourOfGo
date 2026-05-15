@@ -89,31 +89,29 @@ class GoByExampleService {
         ? _decodeEntities(titleMatch.group(1)!.trim())
         : index.title;
 
-    // Identify the shell row (if any). The shell block's code cell contains
-    // a `<span class="gp">` (green prompt) — that's the marker.
-    int? shellIdx;
-    for (int i = allCells.length - 1; i >= 0; i--) {
-      if (allCells[i].codeHtml.contains('class="gp"')) {
-        shellIdx = i;
-        break;
+    final shellOutputs = <String>[];
+    final segments = <ExampleSegment>[];
+    
+    for (int i = 0; i < allCells.length; i++) {
+      final codeHtml = allCells[i].codeHtml;
+      // Chroma adds 'gp' (generic prompt) or 'go' (generic output) to shell blocks.
+      final isShell = codeHtml.contains('class="gp"') || codeHtml.contains('class="go"');
+      
+      final annotation = _stripHtml(allCells[i].docsHtml).trim();
+      final code = _extractCode(codeHtml).trim();
+      
+      if (isShell) {
+        if (code.isNotEmpty) shellOutputs.add(code);
+        if (annotation.isNotEmpty) {
+          segments.add(ExampleSegment(annotation: annotation, code: ''));
+        }
+      } else {
+        if (annotation.isEmpty && code.isEmpty) continue;
+        segments.add(ExampleSegment(annotation: annotation, code: code));
       }
     }
 
-    String shellOutput = '';
-    if (shellIdx != null) {
-      shellOutput = _extractCode(allCells[shellIdx].codeHtml)
-          .trim()
-          .replaceAll(RegExp(r'\n{3,}'), '\n\n');
-    }
-
-    final segments = <ExampleSegment>[];
-    for (int i = 0; i < allCells.length; i++) {
-      if (i == shellIdx) continue;
-      final annotation = _stripHtml(allCells[i].docsHtml).trim();
-      final code = _extractCode(allCells[i].codeHtml).trim();
-      if (annotation.isEmpty && code.isEmpty) continue;
-      segments.add(ExampleSegment(annotation: annotation, code: code));
-    }
+    final shellOutput = shellOutputs.join('\n\n');
 
     return GoExample(
       slug: index.slug,
