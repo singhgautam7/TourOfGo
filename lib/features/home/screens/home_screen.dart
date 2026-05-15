@@ -10,7 +10,7 @@ import '../../../providers/tour_content_provider.dart';
 import '../../../providers/lesson_position_provider.dart';
 import '../../../providers/progress_provider.dart';
 import '../widgets/continue_card.dart';
-import '../widgets/refresh_button.dart';
+import '../widgets/attribution_pill.dart';
 import '../../navigation/widgets/chapter_browser_list.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -23,6 +23,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _service = ContentService();
   int? _lastFetchMs;
+  bool _isSyncing = false;
 
   @override
   void initState() {
@@ -35,12 +36,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (mounted) setState(() => _lastFetchMs = ms);
   }
 
-  void _showApiInfoSheet() {
-    showModalBottomSheet(
-      context: context,
-      useRootNavigator: true,
-      builder: (_) => _ApiInfoSheet(),
-    );
+  Future<void> _handleRefresh() async {
+    setState(() => _isSyncing = true);
+    try {
+      await ref
+          .read(tourContentNotifierProvider.notifier)
+          .fetchFromApi();
+      await _loadLastFetch();
+    } finally {
+      if (mounted) setState(() => _isSyncing = false);
+    }
   }
 
   @override
@@ -52,159 +57,110 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       backgroundColor: cs.surface,
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                    KuberSpacing.lg, KuberSpacing.md, KuberSpacing.lg, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // App bar row
-                    Row(
-                      children: [
-                        _GoMarkWidget(cs: cs),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Tour of Go',
-                          style: GoogleFonts.inter(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: cs.primary,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                        const Spacer(),
-                        GestureDetector(
-                          onTap: () => context.push('/more'),
-                          child: Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: cs.surfaceContainer,
-                              borderRadius:
-                                  BorderRadius.circular(KuberRadius.md),
-                              border: Border.all(color: cs.outline),
-                            ),
-                            child: Icon(Icons.tune_rounded,
-                                size: 18, color: cs.onSurfaceVariant),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: KuberSpacing.lg),
-
-                    // Page header row
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                greetingText(),
-                                style: GoogleFonts.inter(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w800,
-                                  color: cs.onSurface,
-                                  letterSpacing: -0.6,
-                                  height: 1.1,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Pick up where you left off.',
-                                style: GoogleFonts.inter(
-                                  fontSize: 13,
-                                  color: cs.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        RefreshButton(
-                          isRefreshing: contentState.isLoading,
-                          onTap: () async {
-                            await ref
-                                .read(tourContentNotifierProvider.notifier)
-                                .fetchFromApi();
-                            _loadLastFetch();
-                          },
-                          onLongPress: _showApiInfoSheet,
-                        ),
-                      ],
-                    ),
-
-                    // Last updated row
-                    if (_lastFetchMs != null) ...[
-                      const SizedBox(height: KuberSpacing.sm),
+        child: RefreshIndicator(
+          onRefresh: _handleRefresh,
+          color: cs.primary,
+          backgroundColor: cs.surfaceContainer,
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                      KuberSpacing.lg, KuberSpacing.md, KuberSpacing.lg, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // App bar row
                       Row(
                         children: [
+                          _GoMarkWidget(cs: cs),
+                          const SizedBox(width: 10),
                           Text(
-                            'LAST UPDATED: ',
+                            'Tour of Go',
                             style: GoogleFonts.inter(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: cs.onSurfaceVariant,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                          Text(
-                            formatLastUpdated(_lastFetchMs!),
-                            style: GoogleFonts.jetBrainsMono(
-                              fontSize: 11,
+                              fontSize: 16,
                               fontWeight: FontWeight.w700,
                               color: cs.primary,
-                              letterSpacing: 1.2,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          const Spacer(),
+                          GestureDetector(
+                            onTap: () => context.push('/more'),
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: cs.surfaceContainer,
+                                borderRadius:
+                                    BorderRadius.circular(KuberRadius.md),
+                                border: Border.all(color: cs.outline),
+                              ),
+                              child: Icon(Icons.tune_rounded,
+                                  size: 18, color: cs.onSurfaceVariant),
                             ),
                           ),
                         ],
                       ),
-                    ],
-                    const SizedBox(height: KuberSpacing.lg),
+                      const SizedBox(height: KuberSpacing.lg),
 
-                    // Continue card
-                    contentState.when(
-                      loading: () =>
-                          const SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
-                      error: (e, _) => _ErrorCard(error: e.toString(), cs: cs),
-                      data: (content) => ContinueCard(
-                        content: content,
-                        position: position,
-                        onContinue: () {
-                          context.push('/reader', extra: position);
-                        },
-                      ),
-                    ),
-
-                    const SizedBox(height: KuberSpacing.lg),
-
-                    // Your progress section
-                    contentState.maybeWhen(
-                      data: (content) => _ProgressSection(content: content),
-                      orElse: () => const SizedBox.shrink(),
-                    ),
-
-                    const SizedBox(height: KuberSpacing.xl),
-
-                    // Attribution
-                    Center(
-                      child: Text(
-                        'Content from go.dev · BSD License',
-                        style: GoogleFonts.jetBrainsMono(
-                          fontSize: 11,
-                          color: cs.onSurfaceVariant.withValues(alpha: 0.6),
+                      // Page header — clean greeting, no refresh button
+                      Text(
+                        greetingText(),
+                        style: GoogleFonts.inter(
+                          fontSize: 30,
+                          fontWeight: FontWeight.w800,
+                          color: cs.onSurface,
+                          letterSpacing: -0.6,
+                          height: 1.1,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: KuberSpacing.xl),
-                  ],
+                      const SizedBox(height: 4),
+                      Text(
+                        'Pick up where you left off.',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: KuberSpacing.lg),
+
+                      // Continue card
+                      contentState.when(
+                        loading: () =>
+                            const SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
+                        error: (e, _) => _ErrorCard(error: e.toString(), cs: cs),
+                        data: (content) => ContinueCard(
+                          content: content,
+                          position: position,
+                          onContinue: () {
+                            context.push('/reader', extra: position);
+                          },
+                        ),
+                      ),
+
+                      const SizedBox(height: KuberSpacing.lg),
+
+                      // Your progress section
+                      contentState.maybeWhen(
+                        data: (content) => _ProgressSection(content: content),
+                        orElse: () => const SizedBox.shrink(),
+                      ),
+
+                      const SizedBox(height: KuberSpacing.xl),
+
+                      // Attribution pill
+                      AttributionPill(
+                        lastFetchMs: _lastFetchMs,
+                        isSyncing: _isSyncing || contentState.isLoading,
+                      ),
+                      const SizedBox(height: KuberSpacing.xl),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -333,82 +289,6 @@ class _GoMarkWidget extends StatelessWidget {
       ),
       child: Center(
         child: Icon(Icons.circle_outlined, color: cs.primary, size: 18),
-      ),
-    );
-  }
-}
-
-class _ApiInfoSheet extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(KuberSpacing.xl),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: cs.onSurfaceVariant.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: KuberSpacing.xl),
-              Text(
-                'Content Source',
-                style: GoogleFonts.inter(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: cs.onSurface,
-                ),
-              ),
-              const SizedBox(height: KuberSpacing.sm),
-              Text(
-                'All lesson content is fetched from the official Go website.',
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  color: cs.onSurfaceVariant,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: KuberSpacing.md),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(KuberSpacing.md),
-                decoration: BoxDecoration(
-                  color: cs.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                  border: Border.all(color: cs.outline),
-                ),
-                child: Text(
-                  'https://go.dev/tour/lesson/',
-                  style: GoogleFonts.jetBrainsMono(
-                    fontSize: 12,
-                    color: cs.primary,
-                  ),
-                ),
-              ),
-              const SizedBox(height: KuberSpacing.lg),
-              SizedBox(
-                width: double.infinity,
-                child: TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Close'),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

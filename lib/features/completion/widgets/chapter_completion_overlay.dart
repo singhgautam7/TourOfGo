@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/go_tour_button.dart';
 
 class ChapterCompletionOverlay extends StatefulWidget {
   final String chapterName;
@@ -173,40 +174,20 @@ class _ChapterCompletionOverlayState extends State<ChapterCompletionOverlay>
                               ),
 
                               const SizedBox(height: 28),
-                              SizedBox(
-                                width: double.infinity,
-                                child: FilledButton.icon(
-                                  onPressed: widget.onNextChapter,
-                                  icon: const SizedBox.shrink(),
-                                  label: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        'Next chapter',
-                                        style: GoogleFonts.inter(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      const Icon(Icons.arrow_forward_rounded,
-                                          size: 18),
-                                    ],
-                                  ),
-                                ),
+                              GoTourButton(
+                                label: 'Next chapter',
+                                icon: Icons.arrow_forward_rounded,
+                                iconAfterLabel: true,
+                                type: GoTourButtonType.primary,
+                                fullWidth: true,
+                                onPressed: widget.onNextChapter,
                               ),
                               const SizedBox(height: 10),
-                              SizedBox(
-                                width: double.infinity,
-                                child: OutlinedButton(
-                                  onPressed: widget.onBrowse,
-                                  child: Text(
-                                    'Browse chapters',
-                                    style: GoogleFonts.inter(
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                ),
+                              GoTourButton(
+                                label: 'Browse chapters',
+                                type: GoTourButtonType.outline,
+                                fullWidth: true,
+                                onPressed: widget.onBrowse,
                               ),
                               const SizedBox(height: 14),
                               TextButton(

@@ -130,6 +130,63 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
+                const SizedBox(height: KuberSpacing.xl),
+
+                // App identity card
+                Container(
+                  padding: const EdgeInsets.all(KuberSpacing.lg),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainer,
+                    borderRadius:
+                        BorderRadius.circular(KuberRadius.md),
+                    border: Border.all(color: cs.outline),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color:
+                              cs.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(
+                              KuberRadius.md),
+                          border: Border.all(
+                              color: cs.primary
+                                  .withValues(alpha: 0.3)),
+                        ),
+                        child: Center(
+                          child: Icon(Icons.circle_outlined,
+                              color: cs.primary, size: 20),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'A Tour of Go',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: cs.onSurface,
+                              ),
+                            ),
+                            Text(
+                              'v1.0.0 · go.dev content',
+                              style: GoogleFonts.jetBrainsMono(
+                                fontSize: 11.5,
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ]),
             ),
           ),

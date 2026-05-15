@@ -21,3 +21,16 @@ String greetingText() {
   if (hour < 17) return 'Good afternoon.';
   return 'Good evening.';
 }
+
+/// Returns relative time string like "just now", "5m ago", "2h ago", "3d ago".
+String relativeTime(int epochMs) {
+  final now = DateTime.now();
+  final then = DateTime.fromMillisecondsSinceEpoch(epochMs);
+  final diff = now.difference(then);
+
+  if (diff.inSeconds < 60) return 'just now';
+  if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+  if (diff.inHours < 24) return '${diff.inHours}h ago';
+  if (diff.inDays < 7) return '${diff.inDays}d ago';
+  return formatLastUpdated(epochMs);
+}

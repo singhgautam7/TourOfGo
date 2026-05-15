@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
 
+/// App bar adapted from Kuber's KuberAppBar.
+///
+/// Shows a back button, optional home button, title, and trailing actions.
+/// When [title] is null, shows the branded Go icon + "Tour of Go" label.
 class KuberAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final List<Widget>? actions;
@@ -38,6 +41,7 @@ class KuberAppBar extends StatelessWidget implements PreferredSizeWidget {
               if (showBack) ...[
                 _AppBarButton(
                   icon: Icons.arrow_back_rounded,
+                  tooltip: 'Back',
                   onTap: () => Navigator.pop(context),
                   cs: cs,
                 ),
@@ -46,22 +50,48 @@ class KuberAppBar extends StatelessWidget implements PreferredSizeWidget {
               if (showHome) ...[
                 _AppBarButton(
                   icon: Icons.home_outlined,
+                  tooltip: 'Home',
                   onTap: () => context.go('/'),
                   cs: cs,
                 ),
                 const SizedBox(width: KuberSpacing.sm),
               ],
-              if (title == null || title!.isEmpty)
-                const SizedBox.shrink()
-              else
+              if (title == null) ...[
+                // Branded Go mark
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: cs.primary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(KuberRadius.md),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.circle_outlined,
+                      color: cs.primary,
+                      size: 20,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Tour of Go',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: cs.primary,
+                        letterSpacing: -0.3,
+                      ),
+                ),
+              ] else if (title!.isNotEmpty)
                 Text(
                   title!,
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                    color: cs.onSurface,
-                    letterSpacing: -0.3,
-                  ),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: cs.onSurface,
+                        letterSpacing: -0.3,
+                      ),
                 ),
               const Spacer(),
               if (actions != null) ...actions!,
@@ -75,27 +105,33 @@ class KuberAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 class _AppBarButton extends StatelessWidget {
   final IconData icon;
+  final String tooltip;
   final VoidCallback onTap;
   final ColorScheme cs;
 
   const _AppBarButton({
     required this.icon,
+    required this.tooltip,
     required this.onTap,
     required this.cs,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
-        decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline.withValues(alpha: 0.25)),
+    return Tooltip(
+      message: tooltip,
+      triggerMode: TooltipTriggerMode.longPress,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(KuberRadius.md),
+            border: Border.all(color: cs.outline.withValues(alpha: 0.25)),
+          ),
+          child: Icon(icon, color: cs.onSurfaceVariant, size: 18),
         ),
-        child: Icon(icon, color: cs.onSurfaceVariant, size: 18),
       ),
     );
   }

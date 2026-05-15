@@ -73,7 +73,7 @@ class KuberBottomSheet extends StatelessWidget {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.inter(
-                                fontSize: 22,
+                                fontSize: 24,
                                 fontWeight: FontWeight.w800,
                                 color: cs.onSurface,
                                 letterSpacing: -0.5,

@@ -2,7 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 
-// Adapted from Kuber's showKuberSnackBar — OverlayEntry-based snackbar.
+// Adapted from Kuber's showKuberSnackBar — OverlayEntry-based snackbar
+// with progress countdown bar.
 
 const Duration _kSnackDuration = Duration(seconds: 5);
 const Duration _kAnimDuration = Duration(milliseconds: 220);
@@ -18,15 +19,21 @@ void _dismiss() {
   final entry = _currentEntry;
   _currentController = null;
   _currentEntry = null;
-  ctrl?.animateOut().then((_) {
+  if (ctrl != null && entry != null) {
+    ctrl.animateOut().then((_) {
+      if (entry.mounted) entry.remove();
+    });
+  } else {
     if (entry?.mounted ?? false) entry!.remove();
-  });
+  }
 }
 
 void showGoTourSnackBar(
   BuildContext context,
   String message, {
   bool isError = false,
+  String? actionLabel,
+  VoidCallback? onAction,
 }) {
   _dismiss();
   final overlay = Overlay.of(context, rootOverlay: true);
@@ -36,6 +43,8 @@ void showGoTourSnackBar(
       controller: ctrl,
       message: message,
       isError: isError,
+      actionLabel: actionLabel,
+      onAction: onAction,
       onClose: _dismiss,
     ),
   );
@@ -55,12 +64,16 @@ class _SnackWidget extends StatefulWidget {
   final _Controller controller;
   final String message;
   final bool isError;
+  final String? actionLabel;
+  final VoidCallback? onAction;
   final VoidCallback onClose;
   const _SnackWidget({
     required this.controller,
     required this.message,
     required this.isError,
     required this.onClose,
+    this.actionLabel,
+    this.onAction,
   });
   @override
   State<_SnackWidget> createState() => _SnackWidgetState();
@@ -70,6 +83,8 @@ class _SnackWidgetState extends State<_SnackWidget>
     with TickerProviderStateMixin {
   late final AnimationController _slideCtrl;
   late final Animation<double> _slideAnim;
+  late final AnimationController _progressCtrl;
+  bool _actionFired = false;
 
   @override
   void initState() {
@@ -78,11 +93,15 @@ class _SnackWidgetState extends State<_SnackWidget>
         AnimationController(vsync: this, duration: _kAnimDuration);
     _slideAnim =
         CurvedAnimation(parent: _slideCtrl, curve: Curves.easeOutCubic);
+    _progressCtrl =
+        AnimationController(vsync: this, duration: _kSnackDuration);
     widget.controller._attach(this);
     _slideCtrl.forward();
+    _progressCtrl.forward();
   }
 
   Future<void> _animateOut() async {
+    _progressCtrl.stop();
     if (!mounted) return;
     await _slideCtrl.reverse();
   }
@@ -90,14 +109,22 @@ class _SnackWidgetState extends State<_SnackWidget>
   @override
   void dispose() {
     _slideCtrl.dispose();
+    _progressCtrl.dispose();
     super.dispose();
+  }
+
+  void _handleAction(VoidCallback? cb) {
+    if (_actionFired) return;
+    _actionFired = true;
+    widget.onClose();
+    cb?.call();
   }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final top = MediaQuery.of(context).padding.top;
-    final barColor = widget.isError ? cs.error : cs.primary;
+    final barColor = widget.isError ? cs.error : cs.tertiary;
 
     return Positioned(
       top: top + 8,
@@ -127,9 +154,10 @@ class _SnackWidgetState extends State<_SnackWidget>
             ),
             child: Row(
               children: [
+                // Left accent bar
                 Container(
                   width: 4,
-                  height: 44,
+                  height: 48,
                   margin: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
                     color: barColor,
@@ -142,18 +170,52 @@ class _SnackWidgetState extends State<_SnackWidget>
                       ? Icons.error_outline_rounded
                       : Icons.check_circle_outline_rounded,
                   color: barColor,
-                  size: 20,
+                  size: 22,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    child: Text(
-                      widget.message,
-                      style: TextStyle(color: cs.onSurface, fontSize: 14),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.message,
+                          style: TextStyle(
+                              color: cs.onSurface, fontSize: 14),
+                        ),
+                        const SizedBox(height: 8),
+                        // Progress countdown bar
+                        AnimatedBuilder(
+                          animation: _progressCtrl,
+                          builder: (context, child) {
+                            return LinearProgressIndicator(
+                              value: 1.0 - _progressCtrl.value,
+                              minHeight: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  cs.primary),
+                              backgroundColor: cs.outline,
+                              borderRadius: BorderRadius.circular(1),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ),
+                const SizedBox(width: 4),
+                if (widget.actionLabel != null)
+                  TextButton(
+                    onPressed: () => _handleAction(widget.onAction),
+                    child: Text(
+                      widget.actionLabel!,
+                      style: TextStyle(
+                        color: cs.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 IconButton(
                   icon: const Icon(Icons.close, size: 18),
                   color: cs.onSurfaceVariant,

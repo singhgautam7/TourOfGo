@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/go_tour_button.dart';
 import '../widgets/onboarding_dots_indicator.dart';
 
 class OnboardingPage2 extends StatelessWidget {
@@ -106,26 +107,13 @@ class OnboardingPage2 extends StatelessWidget {
               children: [
                 OnboardingDotsIndicator(pageCount: 2, currentPage: 1),
                 const SizedBox(height: 18),
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: FilledButton(
-                    onPressed: onStart,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Start learning',
-                          style: GoogleFonts.inter(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.arrow_forward_rounded, size: 18),
-                      ],
-                    ),
-                  ),
+                GoTourButton(
+                  label: 'Start learning',
+                  icon: Icons.arrow_forward_rounded,
+                  iconAfterLabel: true,
+                  type: GoTourButtonType.primary,
+                  fullWidth: true,
+                  onPressed: onStart,
                 ),
               ],
             ),

@@ -5,6 +5,7 @@ import '../../../core/models/tour_models.dart';
 import '../../../providers/lesson_position_provider.dart';
 import '../../../providers/progress_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../shared/widgets/go_tour_button.dart';
 
 class ContinueCard extends ConsumerWidget {
   final Map<String, ChapterData> content;
@@ -104,27 +105,13 @@ class ContinueCard extends ConsumerWidget {
                 ),
               ),
               const Spacer(),
-              FilledButton.icon(
+              GoTourButton(
+                label: 'Continue',
+                icon: Icons.arrow_forward_rounded,
+                iconAfterLabel: true,
+                type: GoTourButtonType.primary,
+                height: 42,
                 onPressed: onContinue,
-                icon: const SizedBox.shrink(),
-                label: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Continue',
-                      style: GoogleFonts.inter(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    const Icon(Icons.arrow_forward_rounded, size: 16),
-                  ],
-                ),
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 18, vertical: 10),
-                ),
               ),
             ],
           ),
@@ -229,30 +216,13 @@ class _EmptyVariantBody extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 14),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: onStart,
-            icon: const SizedBox.shrink(),
-            label: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Begin first lesson',
-                  style: GoogleFonts.inter(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                const Icon(Icons.arrow_forward_rounded, size: 16),
-              ],
-            ),
-            style: FilledButton.styleFrom(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-            ),
-          ),
+        GoTourButton(
+          label: 'Begin first lesson',
+          icon: Icons.arrow_forward_rounded,
+          iconAfterLabel: true,
+          type: GoTourButtonType.primary,
+          fullWidth: true,
+          onPressed: onStart,
         ),
       ],
     );
