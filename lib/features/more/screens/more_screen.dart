@@ -88,7 +88,7 @@ class MoreScreen extends ConsumerWidget {
                           icon: Icons.info_outline_rounded,
                           iconColor: cs.primary,
                           label: 'About this app',
-                          subtitle: 'Version 1.0.0',
+                          subtitle: 'Information and licenses',
                           onTap: () => context.push('/more/about'),
                           cs: cs,
                         ),
