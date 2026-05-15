@@ -6,6 +6,7 @@ import '../../../core/models/tour_models.dart';
 import '../../../core/utils/go_syntax_highlighter.dart';
 import '../../../providers/settings_provider.dart';
 import 'code_card_chrome.dart';
+import 'line_numbered_code.dart';
 
 class CodeInlineCard extends ConsumerWidget {
   final CodeFile file;
@@ -14,75 +15,42 @@ class CodeInlineCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final wrap = ref.watch(settingsNotifierProvider).wrapLines;
 
-    final lineCount = '\n'.allMatches(file.content).length + 1;
-    final gutterWidth = (lineCount.toString().length * 9.0) + 16.0;
-
-    final highlightedText = SelectableText.rich(
-      TextSpan(
-        children: GoSyntaxHighlighter.highlight(
-          file.content,
-          isDark: isDark,
-        ),
-      ),
-      style: GoogleFonts.jetBrainsMono(
-        fontSize: 13,
-        height: 1.6,
-        fontFeatures: const [
-          FontFeature.disable('liga'),
-          FontFeature.disable('calt'),
-        ],
-      ),
+    final codeStyle = GoogleFonts.jetBrainsMono(
+      fontSize: 13,
+      height: 1.6,
+      fontFeatures: const [
+        FontFeature.disable('liga'),
+        FontFeature.disable('calt'),
+      ],
     );
 
     return CodeCardChrome(
       filename: file.name,
-      body: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              width: gutterWidth,
-              padding:
-                  const EdgeInsets.fromLTRB(8, 0, 8, KuberSpacing.lg),
-              decoration: BoxDecoration(
-                border: Border(right: BorderSide(color: cs.outline)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: List.generate(
-                  lineCount,
-                  (i) => Text(
-                    '${i + 1}',
-                    style: GoogleFonts.jetBrainsMono(
-                      fontSize: 13,
-                      height: 1.6,
-                      color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-                      fontFeatures: const [
-                        FontFeature.disable('liga'),
-                        FontFeature.disable('calt'),
-                      ],
-                    ),
-                  ),
+      body: Padding(
+        padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
+        child: LineNumberedCode(
+          text: file.content,
+          codeStyle: codeStyle,
+          wrap: wrap,
+          bodyBuilder: (context, maxWidth) {
+            final body = SelectableText.rich(
+              TextSpan(
+                children: GoSyntaxHighlighter.highlight(
+                  file.content,
+                  isDark: isDark,
                 ),
               ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                    KuberSpacing.md, 0, KuberSpacing.lg, KuberSpacing.lg),
-                child: wrap
-                    ? highlightedText
-                    : SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: highlightedText,
-                      ),
-              ),
-            ),
-          ],
+              style: codeStyle,
+            );
+            if (wrap) return body;
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: body,
+            );
+          },
         ),
       ),
     );

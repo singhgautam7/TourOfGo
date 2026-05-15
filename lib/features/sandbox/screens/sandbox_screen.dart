@@ -7,6 +7,7 @@ import '../../../core/utils/compile_service.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../reader/widgets/code_card_chrome.dart';
 import '../../reader/widgets/go_code_controller.dart';
+import '../../reader/widgets/line_numbered_code.dart';
 import '../../reader/widgets/output_panel.dart';
 import '../../reader/widgets/run_button.dart';
 
@@ -156,83 +157,55 @@ class _EditorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
+    final codeStyle = GoogleFonts.jetBrainsMono(
+      fontSize: 13,
+      height: 1.6,
+      color: cs.onSurface,
+      fontFeatures: const [
+        FontFeature.disable('liga'),
+        FontFeature.disable('calt'),
+      ],
+    );
+
     return CodeCardChrome(
       filename: 'main.go',
       trailing: const _EditableBadge(),
-      body: ValueListenableBuilder<TextEditingValue>(
-        valueListenable: controller,
-        builder: (context, value, _) {
-          final lineCount = '\n'.allMatches(value.text).length + 1;
-          final gutterWidth = (lineCount.toString().length * 9.0) + 16.0;
-          final codeStyle = GoogleFonts.jetBrainsMono(
-            fontSize: 13,
-            height: 1.6,
-            color: cs.onSurface,
-            fontFeatures: const [
-              FontFeature.disable('liga'),
-              FontFeature.disable('calt'),
-            ],
-          );
-          final gutterStyle = GoogleFonts.jetBrainsMono(
-            fontSize: 13,
-            height: 1.6,
-            color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-            fontFeatures: const [
-              FontFeature.disable('liga'),
-              FontFeature.disable('calt'),
-            ],
-          );
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(
-                0, 0, KuberSpacing.md, KuberSpacing.md),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: gutterWidth,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
-                    border: Border(right: BorderSide(color: cs.outline)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      for (int i = 0; i < lineCount; i++)
-                        Text('${i + 1}', style: gutterStyle),
-                    ],
-                  ),
+      body: Padding(
+        padding: const EdgeInsets.only(bottom: KuberSpacing.md),
+        child: ValueListenableBuilder<TextEditingValue>(
+          valueListenable: controller,
+          builder: (context, value, _) {
+            return LineNumberedCode(
+              text: value.text,
+              codeStyle: codeStyle,
+              wrap: true,
+              bodyBuilder: (context, _) => TextField(
+                controller: controller,
+                maxLines: null,
+                minLines: 12,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.newline,
+                autocorrect: false,
+                enableSuggestions: false,
+                smartDashesType: SmartDashesType.disabled,
+                smartQuotesType: SmartQuotesType.disabled,
+                cursorColor: cs.primary,
+                style: codeStyle,
+                decoration: const InputDecoration(
+                  isCollapsed: true,
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  focusedErrorBorder: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
                 ),
-                const SizedBox(width: KuberSpacing.md),
-                Expanded(
-                  child: TextField(
-                    controller: controller,
-                    maxLines: null,
-                    minLines: 12,
-                    keyboardType: TextInputType.multiline,
-                    textInputAction: TextInputAction.newline,
-                    autocorrect: false,
-                    enableSuggestions: false,
-                    smartDashesType: SmartDashesType.disabled,
-                    smartQuotesType: SmartQuotesType.disabled,
-                    cursorColor: cs.primary,
-                    style: codeStyle,
-                    decoration: const InputDecoration(
-                      isCollapsed: true,
-                      filled: false,
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      disabledBorder: InputBorder.none,
-                      errorBorder: InputBorder.none,
-                      focusedErrorBorder: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
+              ),
+            );
+          },
+        ),
       ),
     );
   }

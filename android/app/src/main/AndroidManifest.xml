@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="tourgo"
+        android:label="A Tour of Go"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
