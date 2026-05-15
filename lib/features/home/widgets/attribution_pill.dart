@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../providers/tour_content_provider.dart';
@@ -150,6 +151,15 @@ class _SyncInfoSheetState extends State<_SyncInfoSheet> {
     if (mounted) Navigator.pop(context);
   }
 
+  Future<void> _openSourceUrl() async {
+    final uri = Uri.parse('https://go.dev/tour/lesson/');
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      await launchUrl(uri);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -160,10 +170,48 @@ class _SyncInfoSheetState extends State<_SyncInfoSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _InfoRow(
-            label: 'Source',
-            value: 'go.dev/tour/lesson',
-            cs: cs,
+          // Source URL — tappable with accent color + arrow
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 90,
+                child: Text(
+                  'Source',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: _openSourceUrl,
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          'go.dev/tour/lesson',
+                          style: GoogleFonts.jetBrainsMono(
+                            fontSize: 12,
+                            color: cs.primary,
+                            decoration: TextDecoration.underline,
+                            decorationColor: cs.primary.withValues(alpha: 0.5),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.arrow_outward_rounded,
+                        size: 14,
+                        color: cs.primary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: KuberSpacing.md),
           _InfoRow(

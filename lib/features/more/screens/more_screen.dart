@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/models/tour_models.dart';
 import '../../../providers/progress_provider.dart';
+import '../../../providers/lesson_position_provider.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/go_tour_snackbar.dart';
@@ -152,6 +154,10 @@ class MoreScreen extends ConsumerWidget {
     );
     if (ok == true && context.mounted) {
       await ref.read(progressNotifierProvider.notifier).resetAll();
+      await ref.read(lessonPositionNotifierProvider.notifier).goTo(
+            kChapterOrder.first,
+            0,
+          );
       if (context.mounted) {
         showGoTourSnackBar(context, 'Progress cleared.');
       }

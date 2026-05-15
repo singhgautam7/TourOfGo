@@ -154,7 +154,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         lastFetchMs: _lastFetchMs,
                         isSyncing: _isSyncing || contentState.isLoading,
                       ),
-                      const SizedBox(height: KuberSpacing.xl),
+                      const SizedBox(height: 80),
                     ],
                   ),
                 ),
