@@ -9,7 +9,6 @@ import '../../features/reader/screens/lesson_reader_screen.dart';
 import '../../features/more/screens/more_screen.dart';
 import '../../features/more/screens/settings_screen.dart';
 import '../../features/more/screens/about_screen.dart';
-import '../../features/more/screens/data_screen.dart';
 import '../../features/sandbox/screens/sandbox_screen.dart';
 import '../utils/go_tour_prefs.dart';
 import '../../providers/lesson_position_provider.dart';
@@ -59,10 +58,6 @@ GoRouter router(Ref ref) {
       GoRoute(
         path: '/more/about',
         builder: (_, s) => const AboutScreen(),
-      ),
-      GoRoute(
-        path: '/more/data',
-        builder: (_, s) => const DataScreen(),
       ),
       GoRoute(
         path: '/sandbox',

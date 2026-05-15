@@ -214,16 +214,16 @@ class _ProgressSection extends ConsumerWidget {
             ),
           ],
         ),
-        if (overall == 0) ...[
-          const SizedBox(height: 4),
-          Text(
-            'Start learning to track your progress.',
-            style: GoogleFonts.inter(
-              fontSize: 12.5,
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-        ],
+        // if (overall == 0) ...[
+        //   const SizedBox(height: 4),
+        //   Text(
+        //     'Start learning to track your progress.',
+        //     style: GoogleFonts.inter(
+        //       fontSize: 12.5,
+        //       color: cs.onSurfaceVariant,
+        //     ),
+        //   ),
+        // ],
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(

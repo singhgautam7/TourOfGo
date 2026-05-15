@@ -40,25 +40,6 @@ class MoreScreen extends ConsumerWidget {
                       description: 'Settings, data, and about.',
                     ),
 
-                    // ── LEARN ──────────────────────────────────────────
-                    _SectionTitle('LEARN', cs: cs),
-                    const SizedBox(height: 8),
-                    _MenuCard(
-                      cs: cs,
-                      items: [
-                        _MenuItem(
-                          icon: Icons.restart_alt_rounded,
-                          iconColor: cs.error,
-                          label: 'Reset progress',
-                          subtitle: 'Clear all completed lessons',
-                          isDestructive: true,
-                          onTap: () => _confirmResetProgress(context, ref),
-                          cs: cs,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: KuberSpacing.lg),
-
                     // ── APP ────────────────────────────────────────────
                     _SectionTitle('APP', cs: cs),
                     const SizedBox(height: 8),
@@ -72,15 +53,6 @@ class MoreScreen extends ConsumerWidget {
                           subtitle: 'Theme and font size',
                           onTap: () => context.push('/more/settings'),
                           cs: cs,
-                        ),
-                        _MenuItem(
-                          icon: Icons.storage_rounded,
-                          iconColor: cs.primary,
-                          label: 'Data & Storage',
-                          subtitle: 'Manage cache and progress',
-                          onTap: () => context.push('/more/data'),
-                          cs: cs,
-                          showDividerAbove: true,
                         ),
                       ],
                     ),
@@ -113,6 +85,26 @@ class MoreScreen extends ConsumerWidget {
                     ),
 
                     const SizedBox(height: KuberSpacing.xxl),
+
+                    // ── DANGER ──────────────────────────────────────────
+                    _SectionTitle('DANGER ZONE', cs: cs),
+                    const SizedBox(height: 8),
+                    _MenuCard(
+                      cs: cs,
+                      items: [
+                        _MenuItem(
+                          icon: Icons.restart_alt_rounded,
+                          iconColor: cs.error,
+                          label: 'Reset progress',
+                          subtitle: 'Clear all completed lessons',
+                          isDestructive: true,
+                          onTap: () => _confirmResetProgress(context, ref),
+                          cs: cs,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: KuberSpacing.lg),
+
                     Center(
                       child: Text(
                         'Content from go.dev · BSD License',
