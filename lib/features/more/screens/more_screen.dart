@@ -10,6 +10,7 @@ import '../../../providers/lesson_position_provider.dart';
 import '../../../shared/widgets/kuber_app_bar.dart';
 import '../../../shared/widgets/kuber_page_header.dart';
 import '../../../shared/widgets/go_tour_snackbar.dart';
+import '../../gobyexample/widgets/download_sheet.dart';
 
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
@@ -52,6 +53,25 @@ class MoreScreen extends ConsumerWidget {
                           label: 'Settings',
                           subtitle: 'Theme and font size',
                           onTap: () => context.push('/more/settings'),
+                          cs: cs,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: KuberSpacing.lg),
+
+                    // ── CONTENT ───────────────────────────────────────
+                    _SectionTitle('CONTENT', cs: cs),
+                    const SizedBox(height: 8),
+                    _MenuCard(
+                      cs: cs,
+                      items: [
+                        _MenuItem(
+                          icon: Icons.download_for_offline_rounded,
+                          iconColor: cs.primary,
+                          label: 'Download All Examples',
+                          subtitle:
+                              'Save Go by Example content for offline use',
+                          onTap: () => showGbeDownloadSheet(context),
                           cs: cs,
                         ),
                       ],
