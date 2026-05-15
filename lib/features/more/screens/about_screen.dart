@@ -309,8 +309,10 @@ class _LinkRow extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: () async {
         final uri = Uri.parse(url);
-        if (await canLaunchUrl(uri)) {
+        try {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } catch (_) {
+          await launchUrl(uri);
         }
       },
       child: Row(

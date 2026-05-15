@@ -40,9 +40,11 @@ class LessonInfoSheet extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: () async {
                 final uri = Uri.parse(url);
-                if (await canLaunchUrl(uri)) {
-                  await launchUrl(uri,
-                      mode: LaunchMode.externalApplication);
+                try {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                } catch (_) {
+                  // fallback: try the default mode
+                  await launchUrl(uri);
                 }
                 if (context.mounted) {
                   Navigator.of(context, rootNavigator: true).pop();
