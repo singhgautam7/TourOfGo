@@ -9,6 +9,7 @@ import '../providers/go_by_example_index_provider.dart';
 import '../providers/go_by_example_progress_provider.dart';
 import '../providers/go_example_content_provider.dart';
 import '../widgets/example_content_view.dart';
+import '../widgets/example_info_sheet.dart';
 import '../widgets/example_top_bar.dart';
 
 class ExampleReaderScreen extends ConsumerStatefulWidget {
@@ -87,6 +88,7 @@ class _ExampleReaderScreenState extends ConsumerState<ExampleReaderScreen> {
             currentIndex: widget.index.order,
             totalExamples: totalExamples,
             onBack: () => context.pop(),
+            onInfo: () => showExampleInfoSheet(context, widget.index),
           ),
           Expanded(
             child: GestureDetector(

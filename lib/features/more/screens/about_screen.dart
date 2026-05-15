@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../providers/app_version_provider.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/tourgo_app_bar.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -18,7 +18,7 @@ class AboutScreen extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           const SliverToBoxAdapter(
-            child: KuberAppBar(showBack: true, showHome: true, title: ''),
+            child: TourGoAppBar(showBack: true, showHome: true, title: ''),
           ),
           SliverToBoxAdapter(
             child: Padding(
@@ -100,6 +100,11 @@ class AboutScreen extends StatelessWidget {
                       _LinkRow(
                         label: 'Official Go Tour',
                         url: 'https://go.dev/tour/',
+                      ),
+                      SizedBox(height: KuberSpacing.md),
+                      _LinkRow(
+                        label: 'Official Go by Example',
+                        url: 'https://gobyexample.com/',
                       ),
                       SizedBox(height: KuberSpacing.md),
                       _LinkRow(

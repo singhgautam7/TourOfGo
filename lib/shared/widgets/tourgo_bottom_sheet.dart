@@ -5,14 +5,14 @@ import '../../core/theme/app_theme.dart';
 /// Reusable bottom-sheet shell: drag handle, header (title + close button +
 /// optional subtitle), boundary divider, scrollable body, optional pinned
 /// actions.
-class KuberBottomSheet extends StatelessWidget {
+class TourGoBottomSheet extends StatelessWidget {
   final String title;
   final String? subtitle;
   final Widget? leadingIcon;
   final Widget child;
   final Widget? actions;
 
-  const KuberBottomSheet({
+  const TourGoBottomSheet({
     super.key,
     required this.title,
     this.subtitle,

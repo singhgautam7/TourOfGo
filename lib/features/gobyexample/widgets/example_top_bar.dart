@@ -10,6 +10,7 @@ class ExampleTopBar extends StatelessWidget {
   final int currentIndex;
   final int totalExamples;
   final VoidCallback onBack;
+  final VoidCallback onInfo;
 
   const ExampleTopBar({
     super.key,
@@ -17,6 +18,7 @@ class ExampleTopBar extends StatelessWidget {
     required this.currentIndex,
     required this.totalExamples,
     required this.onBack,
+    required this.onInfo,
   });
 
   @override
@@ -72,9 +74,11 @@ class ExampleTopBar extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: KuberSpacing.sm),
-                  // Spacer slot — keeps the title centered. Could host an
-                  // info button in a future pass.
-                  const SizedBox(width: 38, height: 38),
+                  _ChipButton(
+                    icon: Icons.info_outline_rounded,
+                    onTap: onInfo,
+                    cs: cs,
+                  ),
                 ],
               ),
             ),
