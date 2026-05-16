@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../providers/app_version_provider.dart';
+import '../../../shared/widgets/tourgo_app_bar.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -16,7 +18,7 @@ class AboutScreen extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           const SliverToBoxAdapter(
-            child: KuberAppBar(showBack: true, showHome: true, title: ''),
+            child: TourGoAppBar(showBack: true, showHome: true, title: ''),
           ),
           SliverToBoxAdapter(
             child: Padding(
@@ -101,6 +103,11 @@ class AboutScreen extends StatelessWidget {
                       ),
                       SizedBox(height: KuberSpacing.md),
                       _LinkRow(
+                        label: 'Official Go by Example',
+                        url: 'https://gobyexample.com/',
+                      ),
+                      SizedBox(height: KuberSpacing.md),
+                      _LinkRow(
                         label: 'Go Documentation',
                         url: 'https://go.dev/doc/',
                       ),
@@ -133,13 +140,22 @@ class AboutScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(color: cs.outlineVariant),
                             ),
-                            child: Text(
-                              'v1.0.0',
-                              style: GoogleFonts.jetBrainsMono(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: cs.onSurface,
-                              ),
+                            child: Consumer(
+                              builder: (context, ref, child) {
+                                final versionAsync = ref.watch(appVersionProvider);
+                                return Text(
+                                  versionAsync.when(
+                                    data: (v) => 'v$v',
+                                    loading: () => '...',
+                                    error: (err, stack) => 'v1.0.0',
+                                  ),
+                                  style: GoogleFonts.jetBrainsMono(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: cs.onSurface,
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ],

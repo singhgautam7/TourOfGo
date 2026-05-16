@@ -1,37 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../core/models/tour_models.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/tour_url.dart';
-import '../../../providers/lesson_position_provider.dart';
 import '../../../shared/widgets/tourgo_bottom_sheet.dart';
+import '../models/go_example.dart';
 
-class LessonInfoSheet extends StatelessWidget {
-  final LessonData lesson;
-  final String chapterKey;
-  final String chapterName;
-  final int lessonNum;
-  final int totalLessons;
+class ExampleInfoSheet extends StatelessWidget {
+  final GoExampleIndex example;
 
-  const LessonInfoSheet({
-    super.key,
-    required this.lesson,
-    required this.chapterKey,
-    required this.chapterName,
-    required this.lessonNum,
-    required this.totalLessons,
-  });
+  const ExampleInfoSheet({super.key, required this.example});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final url = tourUrlFor(chapterKey, lessonNum - 1);
+    final url = 'https://gobyexample.com/${example.slug}';
 
     return TourGoBottomSheet(
-      title: lesson.title,
-      subtitle: '$chapterName · Lesson $lessonNum of $totalLessons',
+      title: example.title,
+      subtitle: 'Go by Example',
       actions: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -43,7 +29,6 @@ class LessonInfoSheet extends StatelessWidget {
                 try {
                   await launchUrl(uri, mode: LaunchMode.externalApplication);
                 } catch (_) {
-                  // fallback: try the default mode
                   await launchUrl(uri);
                 }
                 if (context.mounted) {
@@ -91,31 +76,12 @@ class LessonInfoSheet extends StatelessWidget {
   }
 }
 
-/// Helper to show the lesson info sheet using the shared bottom-sheet shell.
-void showLessonInfoSheet(
-  BuildContext context, {
-  required LessonData lesson,
-  required String chapterKey,
-  required String chapterName,
-  required int lessonNum,
-  required int totalLessons,
-}) {
+void showExampleInfoSheet(BuildContext context, GoExampleIndex example) {
   showModalBottomSheet(
     context: context,
     useRootNavigator: true,
     backgroundColor: Colors.transparent,
     isScrollControlled: true,
-    builder: (_) => LessonInfoSheet(
-      lesson: lesson,
-      chapterKey: chapterKey,
-      chapterName: chapterName,
-      lessonNum: lessonNum,
-      totalLessons: totalLessons,
-    ),
+    builder: (_) => ExampleInfoSheet(example: example),
   );
-}
-
-// Convenience for routing to the in-app reader from a parsed tour URL.
-void openLessonInApp(BuildContext context, LessonPosition pos) {
-  context.push('/reader', extra: pos);
 }

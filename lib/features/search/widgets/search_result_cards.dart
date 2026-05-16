@@ -251,3 +251,96 @@ class LessonResultCard extends StatelessWidget {
     );
   }
 }
+
+class ExampleResultCard extends StatelessWidget {
+  final ExampleSearchResult result;
+  final String query;
+
+  const ExampleResultCard({
+    super.key,
+    required this.result,
+    required this.query,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        context.pop();
+        context.push('/example/${result.slug}');
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(
+            horizontal: KuberSpacing.lg, vertical: KuberSpacing.xs),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainer,
+          borderRadius: BorderRadius.circular(KuberRadius.md),
+          border: Border.all(color: cs.outline),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(KuberSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: KuberSpacing.sm, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(KuberRadius.sm),
+                      border: Border.all(color: cs.outline),
+                    ),
+                    child: Text(
+                      'EXAMPLE',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.8,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: KuberSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      'Go by Example',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        color: cs.onSurfaceVariant,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (result.isCompleted)
+                    Icon(Icons.check_circle_rounded,
+                        size: 14, color: cs.primary),
+                ],
+              ),
+              const SizedBox(height: KuberSpacing.sm),
+              HighlightedText(
+                text: result.title,
+                query: query,
+                baseStyle: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
+                ),
+                highlightStyle: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: cs.primary,
+                  backgroundColor: cs.primary.withValues(alpha: 0.12),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/tour_url.dart';
-import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../shared/widgets/tourgo_bottom_sheet.dart';
 
 /// Resolves a relative href to an absolute URL.
 String resolveHref(String href) {
@@ -38,7 +38,7 @@ class LinkBottomSheet extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final inAppPos = tourUrlToPosition(url);
 
-    return KuberBottomSheet(
+    return TourGoBottomSheet(
       title: 'External Link',
       actions: Column(
         mainAxisSize: MainAxisSize.min,

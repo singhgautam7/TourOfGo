@@ -427,6 +427,8 @@ class _SearchResultsList extends StatelessWidget {
               ChapterResultCard(result: r, query: state.query),
             LessonSearchResult r =>
               LessonResultCard(result: r, query: state.query),
+            ExampleSearchResult r =>
+              ExampleResultCard(result: r, query: state.query),
           };
         },
       ),

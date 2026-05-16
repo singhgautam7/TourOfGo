@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 
-/// App bar adapted from Kuber's KuberAppBar.
+/// App bar adapted from Kuber's TourGoAppBar.
 ///
 /// Shows a back button, optional home button, title, and trailing actions.
 /// When [title] is null, shows the branded Go icon + "Tour of Go" label.
-class KuberAppBar extends StatelessWidget implements PreferredSizeWidget {
+class TourGoAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final List<Widget>? actions;
   final bool showBack;
   final bool showHome;
   final double? horizontalPadding;
 
-  const KuberAppBar({
+  const TourGoAppBar({
     super.key,
     this.title,
     this.actions,

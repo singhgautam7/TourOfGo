@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/models/tour_models.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/compile_service.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/tourgo_app_bar.dart';
 import '../../reader/widgets/code_card_chrome.dart';
 import '../../reader/widgets/go_code_controller.dart';
 import '../../reader/widgets/line_numbered_code.dart';
@@ -100,7 +100,7 @@ class _SandboxScreenState extends ConsumerState<SandboxScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.only(top: 4),
-              child: KuberAppBar(
+              child: TourGoAppBar(
                 showBack: true,
                 title: widget.title ?? 'Sandbox',
                 actions: [

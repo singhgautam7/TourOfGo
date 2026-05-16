@@ -48,3 +48,22 @@ class LessonSearchResult extends SearchResult {
     required this.score,
   });
 }
+
+class ExampleSearchResult extends SearchResult {
+  final String slug;
+  final String title;
+  final int order;
+  final int totalExamples;
+  final bool isCompleted;
+  @override
+  final int score;
+
+  ExampleSearchResult({
+    required this.slug,
+    required this.title,
+    required this.order,
+    required this.totalExamples,
+    required this.isCompleted,
+    required this.score,
+  });
+}

@@ -12,4 +12,10 @@ class GoTourPrefs {
   static const fontSize = 'go_tour_font_size';
   static const wrapLines = 'go_tour_wrap_lines';
   static const recentSearches = 'go_tour_recent_searches';
+
+  // Go by Example
+  static const gbeIndexJson = 'gbe_index_json';
+  static const gbeExamplePrefix = 'gbe_example_v3_'; // + slug
+  static const gbeIndexLoaded = 'gbe_index_loaded';
+  static const gbeCompleted = 'gbe_completed_json';
 }

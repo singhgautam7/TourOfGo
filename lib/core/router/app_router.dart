@@ -11,6 +11,8 @@ import '../../features/more/screens/settings_screen.dart';
 import '../../features/more/screens/about_screen.dart';
 import '../../features/sandbox/screens/sandbox_screen.dart';
 import '../../features/search/screens/search_screen.dart';
+import '../../features/gobyexample/screens/example_reader_screen.dart';
+import '../../features/gobyexample/models/go_example.dart';
 import '../utils/go_tour_prefs.dart';
 import '../../providers/lesson_position_provider.dart';
 
@@ -63,6 +65,11 @@ GoRouter router(Ref ref) {
       GoRoute(
         path: '/search',
         builder: (_, _) => const SearchScreen(),
+      ),
+      GoRoute(
+        path: '/example/:slug',
+        builder: (_, state) =>
+            ExampleReaderScreen(index: state.extra as GoExampleIndex),
       ),
       GoRoute(
         path: '/sandbox',

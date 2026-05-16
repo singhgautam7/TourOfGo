@@ -7,9 +7,10 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/models/tour_models.dart';
 import '../../../providers/progress_provider.dart';
 import '../../../providers/lesson_position_provider.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
-import '../../../shared/widgets/kuber_page_header.dart';
+import '../../../shared/widgets/tourgo_app_bar.dart';
+import '../../../shared/widgets/tourgo_page_header.dart';
 import '../../../shared/widgets/go_tour_snackbar.dart';
+import '../../gobyexample/widgets/download_sheet.dart';
 
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
@@ -25,7 +26,7 @@ class MoreScreen extends ConsumerWidget {
           children: [
             const Padding(
               padding: EdgeInsets.only(top: 4),
-              child: KuberAppBar(showBack: true, title: ''),
+              child: TourGoAppBar(showBack: true, title: ''),
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -35,7 +36,7 @@ class MoreScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Page header
-                    const KuberPageHeader(
+                    const TourGoPageHeader(
                       title: 'More',
                       description: 'Settings, data, and about.',
                     ),
@@ -58,6 +59,25 @@ class MoreScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: KuberSpacing.lg),
 
+                    // ── CONTENT ───────────────────────────────────────
+                    _SectionTitle('CONTENT', cs: cs),
+                    const SizedBox(height: 8),
+                    _MenuCard(
+                      cs: cs,
+                      items: [
+                        _MenuItem(
+                          icon: Icons.download_for_offline_rounded,
+                          iconColor: cs.primary,
+                          label: 'Download All Examples',
+                          subtitle:
+                              'Save Go by Example content for offline use',
+                          onTap: () => showGbeDownloadSheet(context),
+                          cs: cs,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: KuberSpacing.lg),
+
                     // ── ABOUT ──────────────────────────────────────────
                     _SectionTitle('ABOUT', cs: cs),
                     const SizedBox(height: 8),
@@ -68,7 +88,7 @@ class MoreScreen extends ConsumerWidget {
                           icon: Icons.info_outline_rounded,
                           iconColor: cs.primary,
                           label: 'About this app',
-                          subtitle: 'Version 1.0.0',
+                          subtitle: 'Information and licenses',
                           onTap: () => context.push('/more/about'),
                           cs: cs,
                         ),
@@ -77,7 +97,16 @@ class MoreScreen extends ConsumerWidget {
                           iconColor: cs.primary,
                           label: 'Official Go tour',
                           subtitle: 'Opens go.dev/tour',
-                          onTap: () => _openGoTour(),
+                          onTap: () => _openUrl('https://go.dev/tour/'),
+                          cs: cs,
+                          showDividerAbove: true,
+                        ),
+                        _MenuItem(
+                          icon: Icons.open_in_new_rounded,
+                          iconColor: cs.primary,
+                          label: 'Official Go by Example',
+                          subtitle: 'Opens gobyexample.com',
+                          onTap: () => _openUrl('https://gobyexample.com'),
                           cs: cs,
                           showDividerAbove: true,
                         ),
@@ -156,8 +185,8 @@ class MoreScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _openGoTour() async {
-    final uri = Uri.parse('https://go.dev/tour/');
+  Future<void> _openUrl(String urlString) async {
+    final uri = Uri.parse(urlString);
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {

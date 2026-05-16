@@ -12,6 +12,10 @@ import '../../../providers/progress_provider.dart';
 import '../widgets/continue_card.dart';
 import '../widgets/attribution_pill.dart';
 import '../../navigation/widgets/chapter_browser_list.dart';
+import '../../gobyexample/models/go_example.dart';
+import '../../gobyexample/providers/go_by_example_index_provider.dart';
+import '../../gobyexample/providers/go_by_example_progress_provider.dart';
+import '../../gobyexample/providers/go_by_example_download_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -174,11 +178,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       const SizedBox(height: KuberSpacing.lg),
 
-                      // Your progress section
+                      // Tour progress section
                       contentState.maybeWhen(
-                        data: (content) => _ProgressSection(content: content),
+                        data: (content) =>
+                            _TourProgressSection(content: content),
                         orElse: () => const SizedBox.shrink(),
                       ),
+
+                      const SizedBox(height: KuberSpacing.xl),
+
+                      // Go by Example progress section
+                      const _GbeProgressSection(),
 
                       const SizedBox(height: KuberSpacing.xl),
 
@@ -207,9 +217,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-class _ProgressSection extends ConsumerWidget {
+class _TourProgressSection extends ConsumerWidget {
   final Map<String, ChapterData> content;
-  const _ProgressSection({required this.content});
+  const _TourProgressSection({required this.content});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -227,7 +237,7 @@ class _ProgressSection extends ConsumerWidget {
           textBaseline: TextBaseline.alphabetic,
           children: [
             Text(
-              'YOUR PROGRESS',
+              'A TOUR OF GO',
               style: GoogleFonts.inter(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -272,6 +282,238 @@ class _ProgressSection extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _GbeProgressSection extends ConsumerWidget {
+  const _GbeProgressSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final indexState = ref.watch(goByExampleIndexNotifierProvider);
+    final completed = ref.watch(goByExampleProgressNotifierProvider);
+    final downloadState = ref.watch(goByExampleDownloadNotifierProvider);
+    final indexCount = indexState.valueOrNull?.length ?? 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              'GO BY EXAMPLE',
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: cs.onSurfaceVariant,
+                letterSpacing: 1.3,
+              ),
+            ),
+            indexState.when(
+              loading: () => Text(
+                'Loading…',
+                style: GoogleFonts.jetBrainsMono(
+                    fontSize: 12, color: cs.onSurfaceVariant),
+              ),
+              error: (_, _) => Text(
+                'Offline',
+                style: GoogleFonts.jetBrainsMono(
+                    fontSize: 12, color: cs.error),
+              ),
+              data: (index) => Text(
+                '${completed.length} / ${index.length}',
+                style: GoogleFonts.jetBrainsMono(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: completed.isEmpty
+                      ? cs.onSurfaceVariant
+                      : cs.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        indexState.when(
+          loading: () => _GbeLoadingCard(cs: cs),
+          error: (e, _) => _GbeErrorCard(error: e.toString(), cs: cs),
+          data: (index) => Container(
+            decoration: BoxDecoration(
+              color: cs.surfaceContainer,
+              borderRadius: BorderRadius.circular(KuberRadius.md),
+              border: Border.all(color: cs.outline),
+            ),
+            child: Column(
+              children: [
+                for (int i = 0; i < index.length; i++) ...[
+                  _GbeExampleRow(
+                    entry: index[i],
+                    isComplete: completed.contains(index[i].slug),
+                    isDownloaded: downloadState.alreadyDownloadedSlugs
+                        .contains(index[i].slug),
+                  ),
+                  if (i < index.length - 1)
+                    Divider(height: 1, color: cs.outline, indent: 52),
+                ],
+              ],
+            ),
+          ),
+        ),
+        if (indexCount == 0) const SizedBox.shrink(),
+      ],
+    );
+  }
+}
+
+class _GbeLoadingCard extends StatelessWidget {
+  final ColorScheme cs;
+  const _GbeLoadingCard({required this.cs});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(KuberSpacing.lg),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.outline),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Loading Go by Example…',
+            style: GoogleFonts.inter(
+                fontSize: 13, color: cs.onSurfaceVariant),
+          ),
+          const SizedBox(height: KuberSpacing.sm),
+          LinearProgressIndicator(
+            color: cs.primary,
+            backgroundColor: cs.outline,
+            borderRadius: BorderRadius.circular(KuberRadius.full),
+            minHeight: 4,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GbeErrorCard extends StatelessWidget {
+  final String error;
+  final ColorScheme cs;
+  const _GbeErrorCard({required this.error, required this.cs});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(KuberSpacing.lg),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(KuberRadius.md),
+        border: Border.all(color: cs.outline),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.wifi_off_rounded,
+              size: 18, color: cs.onSurfaceVariant),
+          const SizedBox(width: KuberSpacing.md),
+          Expanded(
+            child: Text(
+              'Could not load examples. Pull to refresh.',
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                color: cs.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GbeExampleRow extends StatelessWidget {
+  final GoExampleIndex entry;
+  final bool isComplete;
+  final bool isDownloaded;
+
+  const _GbeExampleRow({
+    required this.entry,
+    required this.isComplete,
+    required this.isDownloaded,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => context.push('/example/${entry.slug}', extra: entry),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: KuberSpacing.md, vertical: KuberSpacing.md),
+        child: Row(
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: isComplete
+                    ? cs.primary
+                    : cs.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(KuberRadius.sm),
+                border: Border.all(
+                    color: isComplete ? cs.primary : cs.outline),
+              ),
+              child: isComplete
+                  ? const Icon(Icons.check_rounded,
+                      size: 14, color: Colors.white)
+                  : Text(
+                      '${entry.order + 1}',
+                      style: GoogleFonts.jetBrainsMono(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+            ),
+            const SizedBox(width: KuberSpacing.md),
+            Expanded(
+              child: Text(
+                entry.title,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: cs.onSurface,
+                ),
+              ),
+            ),
+            if (!isDownloaded && !isComplete)
+              Padding(
+                padding: const EdgeInsets.only(left: KuberSpacing.xs),
+                child: Icon(
+                  Icons.download_outlined,
+                  size: 14,
+                  color: cs.onSurfaceVariant.withValues(alpha: 0.45),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.only(left: KuberSpacing.xs),
+              child: Icon(Icons.chevron_right_rounded,
+                  size: 16, color: cs.onSurfaceVariant),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

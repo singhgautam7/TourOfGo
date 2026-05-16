@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../providers/settings_provider.dart';
-import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/tourgo_app_bar.dart';
 import '../../../shared/widgets/settings_widgets.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -20,7 +20,7 @@ class SettingsScreen extends ConsumerWidget {
       body: CustomScrollView(
         slivers: [
           const SliverToBoxAdapter(
-            child: KuberAppBar(showBack: true, title: ''),
+            child: TourGoAppBar(showBack: true, title: ''),
           ),
           SliverToBoxAdapter(
             child: Padding(

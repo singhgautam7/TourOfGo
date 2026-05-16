@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class KuberPageHeader extends StatelessWidget {
+class TourGoPageHeader extends StatelessWidget {
   final String title;
   final String description;
   final IconData actionIcon;
@@ -9,7 +9,7 @@ class KuberPageHeader extends StatelessWidget {
   final String? actionTooltip;
   final bool isLoading;
 
-  const KuberPageHeader({
+  const TourGoPageHeader({
     super.key,
     required this.title,
     required this.description,
@@ -24,7 +24,7 @@ class KuberPageHeader extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      padding: const EdgeInsets.only(top: 8, bottom: 24),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

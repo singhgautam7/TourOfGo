@@ -5,7 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../providers/tour_content_provider.dart';
-import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../shared/widgets/tourgo_bottom_sheet.dart';
 import '../../../shared/widgets/go_tour_button.dart';
 
 /// A small pill at the bottom of the home screen showing sync status
@@ -164,7 +164,7 @@ class _SyncInfoSheetState extends State<_SyncInfoSheet> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return KuberBottomSheet(
+    return TourGoBottomSheet(
       title: 'Content Source',
       subtitle: 'go.dev/tour',
       child: Column(

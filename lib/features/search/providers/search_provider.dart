@@ -2,6 +2,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/utils/search_service.dart';
 import '../../../providers/progress_provider.dart';
 import '../../../providers/tour_content_provider.dart';
+import '../../gobyexample/providers/go_by_example_index_provider.dart';
+import '../../gobyexample/providers/go_by_example_progress_provider.dart';
 import '../models/search_result.dart';
 
 part 'search_provider.g.dart';
@@ -36,10 +38,16 @@ class SearchNotifier extends _$SearchNotifier {
     final content =
         ref.read(tourContentNotifierProvider).valueOrNull ?? const {};
     final completed = ref.read(progressNotifierProvider);
+    final examples =
+        ref.read(goByExampleIndexNotifierProvider).valueOrNull ?? const [];
+    final completedExamples = ref.read(goByExampleProgressNotifierProvider);
+
     final results = _service.search(
       query: trimmed,
       content: content,
       completedLessons: completed,
+      examples: examples,
+      completedExamples: completedExamples,
     );
     state =
         SearchState(query: trimmed, results: results, hasSearched: true);

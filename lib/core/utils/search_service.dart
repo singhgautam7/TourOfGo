@@ -1,5 +1,6 @@
 import '../models/tour_models.dart';
 import '../../features/search/models/search_result.dart';
+import '../../features/gobyexample/models/go_example.dart';
 
 /// Pure-Dart, offline full-text search over already-cached tour content.
 class SearchService {
@@ -10,6 +11,8 @@ class SearchService {
     required String query,
     required Map<String, ChapterData> content,
     required Map<String, Set<int>> completedLessons,
+    List<GoExampleIndex> examples = const [],
+    Set<String> completedExamples = const {},
   }) {
     if (query.trim().isEmpty) return [];
 
@@ -70,6 +73,19 @@ class SearchService {
             score: 20,
           ));
         }
+      }
+    }
+
+    for (final ex in examples) {
+      if (ex.title.toLowerCase().contains(q)) {
+        results.add(ExampleSearchResult(
+          slug: ex.slug,
+          title: ex.title,
+          order: ex.order,
+          totalExamples: examples.length,
+          isCompleted: completedExamples.contains(ex.slug),
+          score: 80,
+        ));
       }
     }
 
