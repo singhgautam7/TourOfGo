@@ -21,8 +21,8 @@ class LessonNavBar extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-          horizontal: KuberSpacing.lg, vertical: KuberSpacing.md),
+      padding: const EdgeInsets.fromLTRB(
+          KuberSpacing.lg, KuberSpacing.sm, KuberSpacing.lg, KuberSpacing.md),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
         border: Border(top: BorderSide(color: cs.outline)),

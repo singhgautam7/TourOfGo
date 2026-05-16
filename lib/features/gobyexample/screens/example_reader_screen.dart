@@ -12,6 +12,8 @@ import '../widgets/example_content_view.dart';
 import '../widgets/example_info_sheet.dart';
 import '../widgets/example_top_bar.dart';
 
+import '../widgets/example_nav_sheet.dart';
+
 class ExampleReaderScreen extends ConsumerStatefulWidget {
   final GoExampleIndex index;
 
@@ -23,17 +25,128 @@ class ExampleReaderScreen extends ConsumerStatefulWidget {
 }
 
 class _ExampleReaderScreenState extends ConsumerState<ExampleReaderScreen> {
-  final ScrollController _scrollController = ScrollController();
-  bool _autoFetchTriggered = false;
+  late final PageController _pageController;
+  final Map<int, ScrollController> _scrollControllers = {};
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.index.order;
+    _pageController = PageController(initialPage: _currentIndex);
+  }
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _pageController.dispose();
+    for (final c in _scrollControllers.values) {
+      c.dispose();
+    }
     super.dispose();
   }
 
-  /// Kick off a download if there's no cached content yet. Idempotent across
-  /// rebuilds — fires at most once per screen instance.
+  ScrollController _controllerFor(int idx) =>
+      _scrollControllers.putIfAbsent(idx, () => ScrollController());
+
+  void _onPageChanged(int idx, List<GoExampleIndex> all) {
+    final previous = _currentIndex;
+    setState(() => _currentIndex = idx);
+    if (idx > previous && previous >= 0 && previous < all.length) {
+      ref
+          .read(goByExampleProgressNotifierProvider.notifier)
+          .markComplete(all[previous].slug);
+    }
+  }
+
+  void _handleNext(List<GoExampleIndex> all) {
+    if (_currentIndex >= all.length - 1) {
+      ref
+          .read(goByExampleProgressNotifierProvider.notifier)
+          .markComplete(all[_currentIndex].slug);
+      context.pop();
+      return;
+    }
+    _pageController.nextPage(
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeOut,
+    );
+  }
+
+  void _handlePrev() {
+    if (_currentIndex <= 0) return;
+    _pageController.previousPage(
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final indexState = ref.watch(goByExampleIndexNotifierProvider);
+    final allExamples = indexState.valueOrNull ?? [];
+    final totalExamples = allExamples.isEmpty ? 1 : allExamples.length;
+
+    if (allExamples.isEmpty) {
+      return Scaffold(
+        backgroundColor: cs.surface,
+        body: Center(child: CircularProgressIndicator(color: cs.primary)),
+      );
+    }
+
+    final safeIndex = _currentIndex.clamp(0, totalExamples - 1);
+    final currentExampleIndex = allExamples[safeIndex];
+
+    return Scaffold(
+      backgroundColor: cs.surface,
+      body: Column(
+        children: [
+          ExampleTopBar(
+            exampleTitle: currentExampleIndex.title,
+            currentIndex: safeIndex,
+            totalExamples: totalExamples,
+            onBack: () => context.pop(),
+            onInfo: () => showExampleInfoSheet(context, currentExampleIndex),
+            onTitleTap: () => showExampleNavSheet(context, initialSlug: currentExampleIndex.slug),
+          ),
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: totalExamples,
+              onPageChanged: (idx) => _onPageChanged(idx, allExamples),
+              itemBuilder: (ctx, idx) {
+                return _ExamplePage(
+                  index: allExamples[idx],
+                  scrollController: _controllerFor(idx),
+                );
+              },
+            ),
+          ),
+          LessonNavBar(
+            onPrev: _handlePrev,
+            onNext: () => _handleNext(allExamples),
+            currentIndex: safeIndex,
+            totalLessons: totalExamples,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExamplePage extends ConsumerStatefulWidget {
+  final GoExampleIndex index;
+  final ScrollController scrollController;
+
+  const _ExamplePage({required this.index, required this.scrollController});
+
+  @override
+  ConsumerState<_ExamplePage> createState() => _ExamplePageState();
+}
+
+class _ExamplePageState extends ConsumerState<_ExamplePage> {
+  bool _autoFetchTriggered = false;
+
   void _maybeAutoFetch() {
     if (_autoFetchTriggered) return;
     _autoFetchTriggered = true;
@@ -45,94 +158,29 @@ class _ExampleReaderScreenState extends ConsumerState<ExampleReaderScreen> {
     });
   }
 
-  void _navigateTo(List<GoExampleIndex> all, int targetOrder) {
-    if (targetOrder < 0 || targetOrder >= all.length) return;
-    final target = all[targetOrder];
-    context.pushReplacement('/example/${target.slug}', extra: target);
-  }
-
-  void _handleNext(List<GoExampleIndex> all) {
-    // Mark current complete on tap Next (matches lesson reader behaviour).
-    ref
-        .read(goByExampleProgressNotifierProvider.notifier)
-        .markComplete(widget.index.slug);
-    if (widget.index.order >= all.length - 1) {
-      context.pop();
-      return;
-    }
-    _navigateTo(all, widget.index.order + 1);
-  }
-
-  void _handlePrev(List<GoExampleIndex> all) {
-    if (widget.index.order <= 0) return;
-    _navigateTo(all, widget.index.order - 1);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final indexState = ref.watch(goByExampleIndexNotifierProvider);
     final contentState =
         ref.watch(goExampleContentNotifierProvider(widget.index.slug));
 
-    final allExamples = indexState.valueOrNull ?? [];
-    final totalExamples =
-        allExamples.isEmpty ? 1 : allExamples.length;
-
-    return Scaffold(
-      backgroundColor: cs.surface,
-      body: Column(
-        children: [
-          ExampleTopBar(
-            exampleTitle: widget.index.title,
-            currentIndex: widget.index.order,
-            totalExamples: totalExamples,
-            onBack: () => context.pop(),
-            onInfo: () => showExampleInfoSheet(context, widget.index),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onHorizontalDragEnd: (details) {
-                final v = details.primaryVelocity ?? 0;
-                if (allExamples.isEmpty) return;
-                if (v < -300) {
-                  _handleNext(allExamples);
-                } else if (v > 300) {
-                  _handlePrev(allExamples);
-                }
-              },
-              child: contentState.when(
-                loading: () => const _LoadingView(),
-                error: (e, _) => _ErrorView(
-                  error: e.toString(),
-                  onRetry: () => ref
-                      .read(goExampleContentNotifierProvider(
-                              widget.index.slug)
-                          .notifier)
-                      .fetchContent(widget.index),
-                ),
-                data: (example) {
-                  if (example == null) {
-                    // No cache yet — auto-fetch and show the loader.
-                    _maybeAutoFetch();
-                    return const _LoadingView();
-                  }
-                  return ExampleContentView(
-                    example: example,
-                    scrollController: _scrollController,
-                  );
-                },
-              ),
-            ),
-          ),
-          LessonNavBar(
-            onPrev: () => _handlePrev(allExamples),
-            onNext: () => _handleNext(allExamples),
-            currentIndex: widget.index.order,
-            totalLessons: totalExamples,
-          ),
-        ],
+    return contentState.when(
+      loading: () => const _LoadingView(),
+      error: (e, _) => _ErrorView(
+        error: e.toString(),
+        onRetry: () => ref
+            .read(goExampleContentNotifierProvider(widget.index.slug).notifier)
+            .fetchContent(widget.index),
       ),
+      data: (example) {
+        if (example == null) {
+          _maybeAutoFetch();
+          return const _LoadingView();
+        }
+        return ExampleContentView(
+          example: example,
+          scrollController: widget.scrollController,
+        );
+      },
     );
   }
 }

@@ -3,14 +3,15 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 
 /// Static top bar for the example reader. Mirrors the lesson reader top bar
-/// visually (back chip + centered label + spacer for symmetry) but the
-/// breadcrumb is non-tappable — examples have no chapter hierarchy.
+/// visually (back chip + centered label + spacer for symmetry) and supports
+/// tapping the title to show a navigation sheet.
 class ExampleTopBar extends StatelessWidget {
   final String exampleTitle;
   final int currentIndex;
   final int totalExamples;
   final VoidCallback onBack;
   final VoidCallback onInfo;
+  final VoidCallback onTitleTap;
 
   const ExampleTopBar({
     super.key,
@@ -19,6 +20,7 @@ class ExampleTopBar extends StatelessWidget {
     required this.totalExamples,
     required this.onBack,
     required this.onInfo,
+    required this.onTitleTap,
   });
 
   @override
@@ -49,20 +51,36 @@ class ExampleTopBar extends StatelessWidget {
                   ),
                   const SizedBox(width: KuberSpacing.sm),
                   Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Go by Example',
-                          style: GoogleFonts.inter(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w700,
-                            color: cs.primary,
-                            letterSpacing: -0.2,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: onTitleTap,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  'Go by Example',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: cs.primary,
+                                    letterSpacing: -0.2,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              Icon(
+                                Icons.expand_more_rounded,
+                                size: 14,
+                                color: cs.primary,
+                              ),
+                            ],
                           ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
                         Text(
                           'Example ${currentIndex + 1} of $totalExamples',
                           style: GoogleFonts.jetBrainsMono(
@@ -70,7 +88,8 @@ class ExampleTopBar extends StatelessWidget {
                             color: cs.onSurfaceVariant,
                           ),
                         ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(width: KuberSpacing.sm),
