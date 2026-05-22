@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/models/tour_models.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../gobyexample/models/go_example.dart';
 import '../../navigation/widgets/chapter_nav_sheet.dart';
 import '../models/search_result.dart';
+import '../providers/recent_searches_provider.dart';
 import 'highlighted_text.dart';
 
 class ChapterResultCard extends ConsumerWidget {
@@ -27,6 +29,8 @@ class ChapterResultCard extends ConsumerWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
+        ref.read(recentSearchesNotifierProvider.notifier)
+            .addSearch(result.chapterTitle);
         context.pop();
         showChapterNavSheet(context, initialChapterKey: result.chapterKey);
       },
@@ -131,7 +135,7 @@ class ChapterResultCard extends ConsumerWidget {
   }
 }
 
-class LessonResultCard extends StatelessWidget {
+class LessonResultCard extends ConsumerWidget {
   final LessonSearchResult result;
   final String query;
 
@@ -142,7 +146,7 @@ class LessonResultCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final chapterDisplay =
         kChapterDisplayNames[result.chapterKey] ?? result.chapterTitle;
@@ -150,7 +154,9 @@ class LessonResultCard extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
-        context.pop();
+        ref.read(recentSearchesNotifierProvider.notifier)
+            .addSearch(result.lessonTitle);
+        // Use push (not pop+push) so back returns to search
         context.push(
           '/reader',
           extra: (
@@ -252,7 +258,7 @@ class LessonResultCard extends StatelessWidget {
   }
 }
 
-class ExampleResultCard extends StatelessWidget {
+class ExampleResultCard extends ConsumerWidget {
   final ExampleSearchResult result;
   final String query;
 
@@ -263,14 +269,22 @@ class ExampleResultCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
-        context.pop();
-        context.push('/example/${result.slug}');
+        ref.read(recentSearchesNotifierProvider.notifier)
+            .addSearch(result.title);
+        // Pass GoExampleIndex as extra to avoid null cast in the router
+        final index = GoExampleIndex(
+          slug: result.slug,
+          title: result.title,
+          order: result.order,
+        );
+        // Use push so back returns to search
+        context.push('/example/${result.slug}', extra: index);
       },
       child: Container(
         margin: const EdgeInsets.symmetric(

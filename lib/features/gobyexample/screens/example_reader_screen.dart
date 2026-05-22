@@ -32,6 +32,8 @@ class _ExampleReaderScreenState extends ConsumerState<ExampleReaderScreen> {
   @override
   void initState() {
     super.initState();
+    // order is 0 when coming from a slug-only fallback; we'll correct it
+    // once the index list loads (see _resolveCurrentIndex).
     _currentIndex = widget.index.order;
     _pageController = PageController(initialPage: _currentIndex);
   }
@@ -92,6 +94,21 @@ class _ExampleReaderScreenState extends ConsumerState<ExampleReaderScreen> {
         backgroundColor: cs.surface,
         body: Center(child: CircularProgressIndicator(color: cs.primary)),
       );
+    }
+
+    // If we were given a stub (title empty = slug-only navigation), resolve
+    // the correct page index by matching the slug once the list is available.
+    if (widget.index.title.isEmpty) {
+      final matched = allExamples
+          .indexWhere((e) => e.slug == widget.index.slug);
+      if (matched >= 0 && matched != _currentIndex) {
+        // Schedule correction after the frame to avoid setState during build
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          setState(() => _currentIndex = matched);
+          _pageController.jumpToPage(matched);
+        });
+      }
     }
 
     final safeIndex = _currentIndex.clamp(0, totalExamples - 1);
