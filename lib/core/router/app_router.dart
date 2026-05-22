@@ -68,8 +68,19 @@ GoRouter router(Ref ref) {
       ),
       GoRoute(
         path: '/example/:slug',
-        builder: (_, state) =>
-            ExampleReaderScreen(index: state.extra as GoExampleIndex),
+        builder: (_, state) {
+          // extra is set when coming from search; resolve from slug otherwise
+          final extra = state.extra;
+          if (extra is GoExampleIndex) {
+            return ExampleReaderScreen(index: extra);
+          }
+          // Fallback: build a stub index from the path param; the screen will
+          // load the full index list and jump to the right position.
+          final slug = state.pathParameters['slug'] ?? '';
+          return ExampleReaderScreen(
+            index: GoExampleIndex(slug: slug, title: '', order: 0),
+          );
+        },
       ),
       GoRoute(
         path: '/sandbox',
