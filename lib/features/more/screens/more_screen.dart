@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/tour_models.dart';
@@ -92,23 +93,43 @@ class MoreScreen extends ConsumerWidget {
                           onTap: () => context.push('/more/about'),
                           cs: cs,
                         ),
-                        _MenuItem(
-                          icon: Icons.open_in_new_rounded,
-                          iconColor: cs.primary,
-                          label: 'Official Go tour',
-                          subtitle: 'Opens go.dev/tour',
-                          onTap: () => _openUrl('https://go.dev/tour/'),
-                          cs: cs,
-                          showDividerAbove: true,
+                      ],
+                    ),
+                    const SizedBox(height: KuberSpacing.lg),
+
+                    // ── HELP US ─────────────────────────────────────────
+                    _SectionTitle('HELP US', cs: cs),
+                    const SizedBox(height: 8),
+                    _HelpStrip(
+                      actions: [
+                        _HelpAction(
+                          icon: Icons.star_rate_rounded,
+                          label: 'Rate',
+                          accent: _HelpAccent.warning,
+                          onTap: () => launchUrl(
+                            Uri.parse(
+                              'https://play.google.com/store/apps/details?id=com.grs.tourgo',
+                            ),
+                            mode: LaunchMode.externalApplication,
+                          ),
                         ),
-                        _MenuItem(
-                          icon: Icons.open_in_new_rounded,
-                          iconColor: cs.primary,
-                          label: 'Official Go by Example',
-                          subtitle: 'Opens gobyexample.com',
-                          onTap: () => _openUrl('https://gobyexample.com'),
-                          cs: cs,
-                          showDividerAbove: true,
+                        _HelpAction(
+                          icon: Icons.share_rounded,
+                          label: 'Share',
+                          onTap: () => SharePlus.instance.share(
+                            ShareParams(
+                              text:
+                                  'Learn Go on the go! A Tour of Go is a '
+                                  'beautifully simple companion for the official '
+                                  'Go tour. Check it out: '
+                                  'https://play.google.com/store/apps/details?id=com.grs.tourgo',
+                            ),
+                          ),
+                        ),
+                        _HelpAction(
+                          icon: Icons.feedback_rounded,
+                          label: 'Feedback',
+                          onTap: () => context.push('/more/feedback'),
                         ),
                       ],
                     ),
@@ -315,6 +336,100 @@ class _MenuItem extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Help Us — 3-action strip (adapted from Kuber)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum _HelpAccent { primary, warning }
+
+class _HelpAction {
+  final IconData icon;
+  final String label;
+  final _HelpAccent accent;
+  final VoidCallback onTap;
+  _HelpAction({
+    required this.icon,
+    required this.label,
+    this.accent = _HelpAccent.primary,
+    required this.onTap,
+  });
+}
+
+class _HelpStrip extends StatelessWidget {
+  final List<_HelpAction> actions;
+  const _HelpStrip({required this.actions});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        for (int i = 0; i < actions.length; i++) ...[
+          Expanded(child: _HelpTile(action: actions[i])),
+          if (i < actions.length - 1) const SizedBox(width: KuberSpacing.sm),
+        ],
+      ],
+    );
+  }
+}
+
+class _HelpTile extends StatelessWidget {
+  final _HelpAction action;
+  const _HelpTile({required this.action});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final accentColor = switch (action.accent) {
+      _HelpAccent.primary => cs.primary,
+      _HelpAccent.warning => const Color(0xFFFFB300),
+    };
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: action.onTap,
+        borderRadius: BorderRadius.circular(KuberRadius.lg),
+        child: Container(
+          decoration: BoxDecoration(
+            color: cs.surfaceContainer,
+            border: Border.all(color: cs.outline),
+            borderRadius: BorderRadius.circular(KuberRadius.lg),
+          ),
+          padding: const EdgeInsets.fromLTRB(8, 14, 8, 12),
+          child: Column(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: accentColor.withValues(alpha: 0.12),
+                  border: Border.all(
+                    color: accentColor.withValues(alpha: 0.30),
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Icon(action.icon, size: 18, color: accentColor),
+              ),
+              const SizedBox(height: KuberSpacing.sm),
+              Text(
+                action.label,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
+                  letterSpacing: -0.1,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

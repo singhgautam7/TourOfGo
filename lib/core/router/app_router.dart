@@ -9,6 +9,7 @@ import '../../features/reader/screens/lesson_reader_screen.dart';
 import '../../features/more/screens/more_screen.dart';
 import '../../features/more/screens/settings_screen.dart';
 import '../../features/more/screens/about_screen.dart';
+import '../../features/more/screens/feedback_screen.dart';
 import '../../features/sandbox/screens/sandbox_screen.dart';
 import '../../features/search/screens/search_screen.dart';
 import '../../features/gobyexample/screens/example_reader_screen.dart';
@@ -61,6 +62,10 @@ GoRouter router(Ref ref) {
       GoRoute(
         path: '/more/about',
         builder: (_, s) => const AboutScreen(),
+      ),
+      GoRoute(
+        path: '/more/feedback',
+        builder: (_, s) => const FeedbackScreen(),
       ),
       GoRoute(
         path: '/search',
