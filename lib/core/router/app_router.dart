@@ -18,10 +18,15 @@ import '../../providers/lesson_position_provider.dart';
 
 part 'app_router.g.dart';
 
+/// The first route, decided in `main()` from the onboarded flag before
+/// `runApp`, so the first frame the native splash hands over to is already
+/// the right screen rather than a blank one waiting on the async redirect.
+final initialLocationProvider = Provider<String>((ref) => '/');
+
 @riverpod
 GoRouter router(Ref ref) {
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: ref.read(initialLocationProvider),
     redirect: (context, state) async {
       final prefs = await SharedPreferences.getInstance();
       final onboarded = prefs.getBool(GoTourPrefs.onboarded) ?? false;

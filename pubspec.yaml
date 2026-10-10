@@ -1,7 +1,7 @@
 name: tourgo
 description: "A Tour of Go — the official Go tour, redesigned for your phone."
 publish_to: 'none'
-version: 1.1.5+4
+version: 2.0.0+5
 
 environment:
   sdk: ^3.11.5
@@ -14,7 +14,6 @@ dependencies:
   go_router: ^14.8.1
   shared_preferences: ^2.3.4
   http: ^1.2.2
-  google_fonts: ^6.2.1
   url_launcher: ^6.3.1
   share_plus: ^13.1.0
   package_info_plus: ^10.1.0
@@ -34,6 +33,36 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+
+  # Engine-registered, never runtime loads: a google_fonts FontLoader parses on
+  # the UI thread and then fires fontsChange, which relayouts every route.
+  # Inter (Kuber's subset) is the UI face, JetBrains Mono the code face,
+  # Instrument Serif italic the About page's editorial accent.
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+    - family: JetBrainsMono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/JetBrainsMono-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/JetBrainsMono-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/JetBrainsMono-Bold.ttf
+          weight: 700
+    - family: InstrumentSerif
+      fonts:
+        - asset: assets/fonts/InstrumentSerif-Italic.ttf
+          style: italic
 
 # The launcher icon is the icon family's own vector drawable, converted from
 # `specs/design/app-icon/` into `android/app/src/main/res/`: an adaptive icon with

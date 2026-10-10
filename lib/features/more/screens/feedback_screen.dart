@@ -2,14 +2,14 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../shared/widgets/tourgo_app_bar.dart';
-import '../../../shared/widgets/tourgo_page_header.dart';
-import '../../../shared/widgets/go_tour_snackbar.dart';
+import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/timed_snackbar.dart';
 
 const _feedbackTypes = ['Bug', 'New Feature Request', 'General Feedback'];
 
@@ -34,7 +34,8 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   Future<void> _submit() async {
     final feedbackText = _feedbackCtrl.text.trim();
     if (feedbackText.isEmpty) {
-      showGoTourSnackBar(context, 'Please enter your feedback before submitting.');
+      showKuberSnackBar(context, 'Please enter your feedback before submitting.',
+          isError: true);
       return;
     }
 
@@ -85,7 +86,9 @@ Screen Size : $screenSize
 
       if (!await launchUrl(uri)) {
         if (mounted) {
-          showGoTourSnackBar(context, 'Could not open mail app. Please try again.');
+          showKuberSnackBar(
+              context, 'Could not open mail app. Please try again.',
+              isError: true);
         }
       }
     } finally {
@@ -100,175 +103,75 @@ Screen Size : $screenSize
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: CustomScrollView(
-        slivers: [
-          const SliverToBoxAdapter(
-            child: TourGoAppBar(showBack: true, showHome: true, title: ''),
-          ),
-          const SliverToBoxAdapter(
-            child: TourGoPageHeader(
-              title: 'Feedback',
-              description: 'Help us make Tour of Go better for you',
+      body: KuberScrollAwayHeader(
+        header: const KuberAppBar(
+          showBack: true,
+          title: 'Feedback',
+        ),
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(KuberSpace.screenMargin,
+              KuberSpace.sm, KuberSpace.screenMargin, KuberSpace.xl),
+          children: [
+            const KuberSectionHeader(title: 'Type'),
+            // M3 choice chips (Kuber controls.md): r8, selected
+            // secondaryContainer with a check.
+            Wrap(
+              spacing: KuberSpace.sm,
+              runSpacing: KuberSpace.sm,
+              children: [
+                for (final t in _feedbackTypes)
+                  ChoiceChip(
+                    label: Text(t),
+                    selected: t == _selectedType,
+                    onSelected: (_) => setState(() => _selectedType = t),
+                  ),
+              ],
             ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
-              KuberSpacing.lg,
-              0,
-              KuberSpacing.lg,
-              KuberSpacing.xl,
+            const SizedBox(height: KuberSpace.sectionGap),
+            const KuberSectionHeader(title: 'Your feedback'),
+            TextField(
+              controller: _feedbackCtrl,
+              minLines: 4,
+              maxLines: 8,
+              style: tt.bodyLarge,
+              decoration: const InputDecoration(
+                hintText: 'Describe your feedback here...',
+              ),
             ),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                // Type label
-                Text(
-                  'TYPE',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurfaceVariant,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-                const SizedBox(height: KuberSpacing.sm),
-
-                // Type dropdown
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: KuberSpacing.lg,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainer,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    border: Border.all(color: cs.outline),
-                  ),
-                  child: DropdownButton<String>(
-                    value: _selectedType,
-                    isExpanded: true,
-                    underline: const SizedBox.shrink(),
-                    dropdownColor: cs.surfaceContainerHigh,
-                    style: tt.bodyLarge?.copyWith(color: cs.onSurface),
-                    items: _feedbackTypes
-                        .map(
-                            (t) => DropdownMenuItem(value: t, child: Text(t)))
-                        .toList(),
-                    onChanged: (v) {
-                      if (v != null) setState(() => _selectedType = v);
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: KuberSpacing.xl),
-
-                // Feedback label
-                Text(
-                  'YOUR FEEDBACK',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurfaceVariant,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-                const SizedBox(height: KuberSpacing.sm),
-
-                // Feedback text area
-                TextField(
-                  controller: _feedbackCtrl,
-                  minLines: 4,
-                  maxLines: 8,
-                  style: tt.bodyLarge?.copyWith(color: cs.onSurface),
-                  decoration: InputDecoration(
-                    hintText: 'Describe your feedback here...',
-                    hintStyle:
-                        tt.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
-                    filled: true,
-                    fillColor: cs.surfaceContainer,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                      borderSide: BorderSide(color: cs.outline),
+            const SizedBox(height: KuberSpace.xl),
+            // A quiet note: tonal box, no border.
+            Container(
+              padding: const EdgeInsets.all(KuberSpace.lg),
+              decoration: BoxDecoration(
+                color: cs.surfaceContainerHigh,
+                borderRadius: KuberShape.mediumR,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.info_outline_rounded,
+                      size: 20, color: cs.onSurfaceVariant),
+                  const SizedBox(width: KuberSpace.md),
+                  Expanded(
+                    child: Text(
+                      'When you submit, a few basic device details (like model, OS version, and app version) will be included to help us better understand and resolve your feedback.',
+                      style: tt.bodySmall,
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                      borderSide: BorderSide(color: cs.outline),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                      borderSide: BorderSide(color: cs.primary, width: 2),
-                    ),
-                    contentPadding: const EdgeInsets.all(KuberSpacing.lg),
                   ),
-                ),
-
-                const SizedBox(height: KuberSpacing.xl),
-
-                // Privacy note
-                Container(
-                  padding: const EdgeInsets.all(KuberSpacing.md),
-                  decoration: BoxDecoration(
-                    color: cs.surfaceContainerHigh,
-                    borderRadius: BorderRadius.circular(KuberRadius.md),
-                    border: Border.all(color: cs.outlineVariant),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        Icons.info_outline_rounded,
-                        size: 16,
-                        color: cs.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: KuberSpacing.sm),
-                      Expanded(
-                        child: Text(
-                          'When you submit, a few basic device details (like model, OS version, and app version) will be included to help us better understand and resolve your feedback.',
-                          style: GoogleFonts.inter(
-                            fontSize: 12,
-                            color: cs.onSurfaceVariant,
-                            height: 1.5,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: KuberSpacing.lg),
-
-                // Submit button
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: FilledButton(
-                    onPressed: _isSubmitting ? null : _submit,
-                    style: FilledButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(KuberRadius.md),
-                      ),
-                    ),
-                    child: _isSubmitting
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child:
-                                CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(
-                            'SUBMIT',
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                  ),
-                ),
-              ]),
+                ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: KuberSpace.xl),
+            AppButton(
+              label: 'Submit',
+              icon: Icons.send_outlined,
+              type: AppButtonType.primary,
+              fullWidth: true,
+              isLoading: _isSubmitting,
+              onPressed: _isSubmitting ? null : _submit,
+            ),
+          ],
+        ),
       ),
     );
   }

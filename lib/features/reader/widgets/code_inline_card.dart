@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:tourgo/core/utils/locale_font.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/tour_models.dart';
 import '../../../core/utils/go_syntax_highlighter.dart';
@@ -18,7 +18,7 @@ class CodeInlineCard extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final wrap = ref.watch(settingsNotifierProvider).wrapLines;
 
-    final codeStyle = GoogleFonts.jetBrainsMono(
+    final codeStyle = monoFont(
       fontSize: 13,
       height: 1.6,
       fontFeatures: const [
@@ -30,7 +30,7 @@ class CodeInlineCard extends ConsumerWidget {
     return CodeCardChrome(
       filename: file.name,
       body: Padding(
-        padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
+        padding: const EdgeInsets.only(bottom: KuberSpace.lg),
         child: LineNumberedCode(
           text: file.content,
           codeStyle: codeStyle,

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../reader/widgets/lesson_nav_bar.dart';
 import '../models/go_example.dart';
@@ -11,6 +10,7 @@ import '../providers/go_example_content_provider.dart';
 import '../widgets/example_content_view.dart';
 import '../widgets/example_info_sheet.dart';
 import '../widgets/example_top_bar.dart';
+import '../../../shared/widgets/kuber_empty_state.dart';
 
 import '../widgets/example_nav_sheet.dart';
 
@@ -92,7 +92,7 @@ class _ExampleReaderScreenState extends ConsumerState<ExampleReaderScreen> {
     if (allExamples.isEmpty) {
       return Scaffold(
         backgroundColor: cs.surface,
-        body: Center(child: CircularProgressIndicator(color: cs.primary)),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -206,18 +206,15 @@ class _LoadingView extends StatelessWidget {
   const _LoadingView();
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircularProgressIndicator(color: cs.primary),
-          const SizedBox(height: KuberSpacing.lg),
-          Text(
-            'Fetching example...',
-            style: GoogleFonts.inter(
-                fontSize: 13, color: cs.onSurfaceVariant),
-          ),
+          const CircularProgressIndicator(),
+          const SizedBox(height: KuberSpace.lg),
+          Text('Fetching example...', style: theme.textTheme.bodyMedium!
+              .copyWith(color: theme.colorScheme.onSurfaceVariant)),
         ],
       ),
     );
@@ -231,41 +228,13 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(KuberSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.wifi_off_rounded,
-                size: 40, color: cs.error.withValues(alpha: 0.8)),
-            const SizedBox(height: KuberSpacing.md),
-            Text(
-              'Could not fetch example',
-              style: GoogleFonts.inter(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface,
-              ),
-            ),
-            const SizedBox(height: KuberSpacing.sm),
-            Text(
-              error,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                  fontSize: 12, color: cs.onSurfaceVariant),
-            ),
-            const SizedBox(height: KuberSpacing.lg),
-            FilledButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Retry'),
-            ),
-          ],
-        ),
-      ),
+    return KuberEmptyState(
+      icon: Icons.wifi_off_rounded,
+      title: 'Could not fetch example',
+      description: error,
+      actionLabel: 'Retry',
+      actionIcon: Icons.refresh_rounded,
+      onAction: onRetry,
     );
   }
 }
-

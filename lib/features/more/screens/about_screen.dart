@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:tourgo/core/utils/locale_font.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../providers/app_version_provider.dart';
-import '../../../shared/widgets/tourgo_app_bar.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
 import '../widgets/about_sections.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -20,26 +20,27 @@ class AboutScreen extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           const SliverToBoxAdapter(
-            child: TourGoAppBar(showBack: true, showHome: true, title: ''),
+            child: KuberAppBar(showBack: true, showBrand: false),
           ),
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: KuberSpacing.lg),
+            padding:
+                const EdgeInsets.symmetric(horizontal: KuberSpace.screenMargin),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 const _DeveloperLetter(),
-                const SizedBox(height: KuberSpacing.xxl),
+                const SizedBox(height: KuberSpace.xxl),
 
                 // Why Tour of Go — visual feature grid
                 const _WhyTourOfGoSection(),
-                const SizedBox(height: KuberSpacing.xl),
+                const SizedBox(height: KuberSpace.xl),
 
                 // What is Tour of Go
                 const AboutWhatIsTourOfGoSection(),
-                const SizedBox(height: KuberSpacing.xl),
+                const SizedBox(height: KuberSpace.xl),
 
                 // Go Philosophy
                 const AboutGoPhilosophySection(),
-                const SizedBox(height: KuberSpacing.xl),
+                const SizedBox(height: KuberSpace.xl),
 
                 // App Info Section
                 _AboutCard(
@@ -51,7 +52,7 @@ class AboutScreen extends StatelessWidget {
                         children: [
                           Text(
                             "App Version",
-                            style: GoogleFonts.inter(
+                            style: localeFont(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                               color: cs.onSurface,
@@ -69,14 +70,11 @@ class AboutScreen extends StatelessWidget {
                                 ),
                                 decoration: BoxDecoration(
                                   color: cs.surfaceContainerHigh,
-                                  borderRadius: BorderRadius.circular(4),
-                                  border: Border.all(
-                                    color: cs.outlineVariant,
-                                  ),
+                                  borderRadius: KuberShape.smallR,
                                 ),
                                 child: Text(
                                   "v$version",
-                                  style: GoogleFonts.jetBrainsMono(
+                                  style: monoFont(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
                                     color: cs.onSurface,
@@ -87,18 +85,13 @@ class AboutScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: KuberSpacing.lg),
+                      const SizedBox(height: KuberSpace.lg),
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: cs.surfaceContainerHigh.withValues(
-                            alpha: 0.5,
-                          ),
-                          borderRadius: BorderRadius.circular(KuberRadius.sm),
-                          border: Border.all(
-                            color: cs.outline.withValues(alpha: 0.1),
-                          ),
+                          color: cs.surfaceContainerLow,
+                          borderRadius: KuberShape.mediumR,
                         ),
                         child: Row(
                           children: [
@@ -111,7 +104,7 @@ class AboutScreen extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 "Content licensed under CC BY 3.0 by Google LLC",
-                                style: GoogleFonts.inter(
+                                style: localeFont(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                   color: cs.onSurfaceVariant,
@@ -124,17 +117,17 @@ class AboutScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.lg),
+                const SizedBox(height: KuberSpace.lg),
 
                 // Links / Feedback
                 const _LinksCard(),
-                const SizedBox(height: KuberSpacing.xxl),
+                const SizedBox(height: KuberSpace.xxl),
 
                 // Footer
                 Center(
                   child: RichText(
                     text: TextSpan(
-                      style: GoogleFonts.inter(
+                      style: localeFont(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: cs.onSurfaceVariant,
@@ -145,7 +138,7 @@ class AboutScreen extends StatelessWidget {
                           alignment: PlaceholderAlignment.middle,
                           child: Icon(
                             Icons.favorite_rounded,
-                            color: Colors.redAccent,
+                            color: cs.error,
                             size: 14,
                           ),
                         ),
@@ -154,7 +147,7 @@ class AboutScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.xxl),
+                const SizedBox(height: KuberSpace.xxl),
               ]),
             ),
           ),
@@ -177,11 +170,11 @@ class _AboutCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(KuberSpacing.lg),
+      padding: const EdgeInsets.all(KuberSpace.lg),
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.cardR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,9 +202,9 @@ class _WhyTourOfGoSection extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(4, 0, 4, 14),
           child: Text(
             'WHY TOUR OF GO?',
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: 12,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               letterSpacing: 0.8,
               color: cs.primary,
             ),
@@ -280,33 +273,12 @@ class _WhyFeatureTile extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.cardR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
-          // Top-aligned gradient overlay
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 64,
-            child: IgnorePointer(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      cs.primary.withValues(alpha: 0.08),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -317,23 +289,20 @@ class _WhyFeatureTile extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: cs.primary.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: cs.primary.withValues(alpha: 0.20),
-                    ),
+                    color: cs.secondaryContainer,
+                    borderRadius: KuberShape.mediumR,
                   ),
                   alignment: Alignment.center,
-                  child: Icon(icon, size: 20, color: cs.primary),
+                  child: Icon(icon, size: 20, color: cs.onSecondaryContainer),
                 ),
                 const SizedBox(height: 14),
                 Text(
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
+                  style: localeFont(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                     color: cs.onSurface,
                     height: 1.25,
                     letterSpacing: -0.1,
@@ -343,7 +312,7 @@ class _WhyFeatureTile extends StatelessWidget {
                 Expanded(
                   child: Text(
                     subtitle,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11.5,
                       color: cs.onSurfaceVariant,
                       height: 1.45,
@@ -370,7 +339,7 @@ class _DeveloperLetter extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    final textStyleRegular = GoogleFonts.inter(
+    final textStyleRegular = localeFont(
       fontSize: 15,
       height: 1.75,
       color: cs.onSurface,
@@ -380,42 +349,17 @@ class _DeveloperLetter extends StatelessWidget {
       fontWeight: FontWeight.w600,
     );
 
+    // Kuber board 3.13: surfaceContainer + 1dp outlineVariant, no gradient
+    // and no watermark.
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.20)),
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            cs.primary.withValues(alpha: 0.10),
-            cs.primary.withValues(alpha: 0.03),
-            cs.surfaceContainer,
-            cs.surfaceContainer,
-          ],
-          stops: const [0.0, 0.3, 0.7, 1.0],
-        ),
+        color: cs.surfaceContainer,
+        borderRadius: KuberShape.cardR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Stack(
         children: [
-          // Watermark quote glyph
-          Positioned(
-            top: 14,
-            right: 22,
-            child: IgnorePointer(
-              child: Text(
-                "\u201C",
-                style: GoogleFonts.playfairDisplay(
-                  fontSize: 92,
-                  fontStyle: FontStyle.italic,
-                  fontWeight: FontWeight.w700,
-                  color: cs.primary.withValues(alpha: 0.18),
-                  height: 1.0,
-                ),
-              ),
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 32, 24, 26),
             child: Column(
@@ -424,9 +368,9 @@ class _DeveloperLetter extends StatelessWidget {
                 // Eyebrow
                 Text(
                   "A NOTE FROM THE MAKER",
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 11,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w600,
                     color: cs.primary,
                     letterSpacing: 1.4,
                   ),
@@ -435,9 +379,9 @@ class _DeveloperLetter extends StatelessWidget {
                 // Title
                 RichText(
                   text: TextSpan(
-                    style: GoogleFonts.inter(
-                      fontSize: 34,
-                      fontWeight: FontWeight.w800,
+                    style: localeFont(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w700,
                       color: cs.onSurface,
                       letterSpacing: -0.7,
                       height: 1.1,
@@ -446,7 +390,7 @@ class _DeveloperLetter extends StatelessWidget {
                       const TextSpan(text: "Why I built\n"),
                       TextSpan(
                         text: "this app",
-                        style: GoogleFonts.playfairDisplay(
+                        style: serifFont(
                           fontSize: 38,
                           fontStyle: FontStyle.italic,
                           fontWeight: FontWeight.w700,
@@ -505,9 +449,9 @@ class _DeveloperLetter extends StatelessWidget {
                   color: Colors.transparent,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: cs.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: cs.outline),
+                      color: cs.surfaceContainerLow,
+                      borderRadius: KuberShape.cardR,
+                      border: Border.all(color: cs.outlineVariant),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: InkWell(
@@ -532,22 +476,15 @@ class _DeveloperLetter extends StatelessWidget {
                                   height: 44,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        cs.primary,
-                                        cs.primary.withValues(alpha: 0.67),
-                                      ],
-                                    ),
+                                    color: cs.primary,
                                   ),
                                   alignment: Alignment.center,
                                   child: Text(
                                     "GS",
-                                    style: GoogleFonts.inter(
+                                    style: localeFont(
                                       fontSize: 16,
-                                      fontWeight: FontWeight.w800,
-                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      color: cs.onPrimary,
                                       letterSpacing: -0.5,
                                     ),
                                   ),
@@ -562,9 +499,9 @@ class _DeveloperLetter extends StatelessWidget {
                                     children: [
                                       Text(
                                         "SIGNED",
-                                        style: GoogleFonts.inter(
+                                        style: localeFont(
                                           fontSize: 11,
-                                          fontWeight: FontWeight.w700,
+                                          fontWeight: FontWeight.w600,
                                           color: cs.onSurfaceVariant,
                                           letterSpacing: 0.4,
                                         ),
@@ -577,7 +514,7 @@ class _DeveloperLetter extends StatelessWidget {
                                               "Gautam",
                                               overflow: TextOverflow.ellipsis,
                                               style:
-                                                  GoogleFonts.playfairDisplay(
+                                                  serifFont(
                                                 fontStyle: FontStyle.italic,
                                                 fontSize: 22,
                                                 fontWeight: FontWeight.w700,
@@ -601,20 +538,20 @@ class _DeveloperLetter extends StatelessWidget {
                             ),
                           ),
                           // Separator Border
-                          Container(height: 1, color: cs.outline),
+                          Container(height: 1, color: cs.outlineVariant),
                           // URL Footer Row
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 10,
                             ),
-                            color: cs.surfaceContainer,
+                            color: cs.surfaceContainerHigh,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   "singhgautam.com",
-                                  style: GoogleFonts.jetBrainsMono(
+                                  style: monoFont(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
                                     color: cs.onSurfaceVariant,
@@ -626,9 +563,9 @@ class _DeveloperLetter extends StatelessWidget {
                                   children: [
                                     Text(
                                       "VISIT",
-                                      style: GoogleFonts.inter(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w700,
+                                      style: localeFont(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
                                         color: cs.primary,
                                         letterSpacing: 1,
                                       ),
@@ -673,9 +610,10 @@ class _LinksCard extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.cardR,
+        border: Border.all(color: cs.outlineVariant),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
           _LinkTile(
@@ -687,7 +625,7 @@ class _LinksCard extends StatelessWidget {
           Divider(
             height: 1,
             thickness: 1,
-            color: cs.outline,
+            color: cs.outlineVariant,
             indent: 16,
             endIndent: 16,
           ),
@@ -700,7 +638,7 @@ class _LinksCard extends StatelessWidget {
           Divider(
             height: 1,
             thickness: 1,
-            color: cs.outline,
+            color: cs.outlineVariant,
             indent: 16,
             endIndent: 16,
           ),
@@ -713,7 +651,7 @@ class _LinksCard extends StatelessWidget {
           Divider(
             height: 1,
             thickness: 1,
-            color: cs.outline,
+            color: cs.outlineVariant,
             indent: 16,
             endIndent: 16,
           ),
@@ -723,6 +661,22 @@ class _LinksCard extends StatelessWidget {
             subtitle: "Help others discover it on the Play Store",
             onTap: () => _openUrl(
               'https://play.google.com/store/apps/details?id=com.grs.tourgo',
+            ),
+          ),
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: cs.outlineVariant,
+            indent: 16,
+            endIndent: 16,
+          ),
+          // Same entry as Kuber's and Mull's About: the developer's Play page.
+          _LinkTile(
+            icon: Icons.apps_rounded,
+            label: "More apps from the developer",
+            subtitle: "Everything else on Google Play",
+            onTap: () => _openUrl(
+              'https://play.google.com/store/apps/developer?id=Gautam+Rajeev+Singh',
             ),
           ),
         ],
@@ -771,8 +725,8 @@ class _LinkTile extends StatelessWidget {
               height: 34,
               decoration: BoxDecoration(
                 color: cs.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: cs.outline),
+                borderRadius: KuberShape.mediumR,
+                border: Border.all(color: cs.outlineVariant),
               ),
               child: Icon(icon, size: 18, color: cs.primary),
             ),
@@ -785,7 +739,7 @@ class _LinkTile extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurface,
@@ -794,7 +748,7 @@ class _LinkTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w400,
                       color: cs.onSurfaceVariant,

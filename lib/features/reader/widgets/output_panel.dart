@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:tourgo/core/utils/locale_font.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/tour_models.dart';
 import '../../../providers/settings_provider.dart';
-
-const _stdoutGreen = Color(0xFF22C55E);
 
 const _noLigatures = <FontFeature>[
   FontFeature.disable('liga'),
@@ -121,69 +119,69 @@ class _Panel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final dotColor = isError ? cs.error : _stdoutGreen;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    // Errors sit on errorContainer; output on the plain card.
+    final fg = isError ? cs.onErrorContainer : cs.onSurface;
+    final muted = isError ? cs.onErrorContainer : cs.onSurfaceVariant;
     final body = SelectableText(
       this.body,
-      style: GoogleFonts.jetBrainsMono(
+      style: monoFont(
         fontSize: 13,
-        color: isError ? cs.error : cs.onSurface,
+        color: fg,
         height: 1.6,
         fontFeatures: _noLigatures,
       ),
     );
 
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
       width: double.infinity,
-      margin: const EdgeInsets.only(top: KuberSpacing.md),
+      margin: const EdgeInsets.only(top: KuberSpace.md),
       decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        color: isError ? cs.errorContainer : cs.surfaceContainer,
+        borderRadius: KuberShape.largeR,
+        border: Border.all(
+            color: isError ? cs.errorContainer : cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(
-                KuberSpacing.lg, KuberSpacing.md, KuberSpacing.lg, 0),
+                KuberSpace.lg, KuberSpace.md, KuberSpace.lg, KuberSpace.sm),
             child: Row(
               children: [
-                Container(
-                  width: 7,
-                  height: 7,
-                  decoration: BoxDecoration(
-                    color: dotColor,
-                    shape: BoxShape.circle,
-                  ),
+                Icon(
+                  isError
+                      ? Icons.error_outline_rounded
+                      : Icons.terminal_rounded,
+                  size: 16,
+                  color: isError ? cs.onErrorContainer : cs.primary,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: KuberSpace.sm),
                 Text(
                   label,
-                  style: GoogleFonts.jetBrainsMono(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: isError ? cs.error : cs.onSurfaceVariant,
-                    letterSpacing: 0.6,
+                  style: monoFont(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: muted,
+                    letterSpacing: 0.8,
                   ),
                 ),
                 if (delayMs != null && delayMs! > 0) ...[
                   const Spacer(),
-                  Text(
-                    '$delayMs ms',
-                    style: GoogleFonts.jetBrainsMono(
-                      fontSize: 10.5,
-                      color: cs.onSurfaceVariant.withValues(alpha: 0.6),
-                    ),
-                  ),
+                  Text('$delayMs ms',
+                      style: theme.textTheme.labelSmall!
+                          .copyWith(color: muted)),
                 ],
               ],
             ),
           ),
-          Divider(height: 12, color: cs.outline),
           Padding(
             padding: const EdgeInsets.fromLTRB(
-                KuberSpacing.lg, 0, KuberSpacing.lg, KuberSpacing.lg),
+                KuberSpace.lg, 0, KuberSpace.lg, KuberSpace.lg),
             child: wrap
                 ? body
                 : SingleChildScrollView(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
+
 // ── Content block types ───────────────────────────────────────────────────────
 
 sealed class ContentBlock {}
@@ -249,9 +251,9 @@ class GoHtmlParser {
               margin: const EdgeInsets.symmetric(horizontal: 1),
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
               decoration: BoxDecoration(
-                color: cs.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: cs.outline),
+                color: cs.surfaceContainerHighest,
+                borderRadius: const BorderRadius.all(
+                    Radius.circular(KuberShape.extraSmall)),
               ),
               child: Text(
                 decodeEntities(_stripTags(ex.$1)).replaceAll(' ', ' '),
@@ -259,7 +261,7 @@ class GoHtmlParser {
                 maxLines: 1,
                 overflow: TextOverflow.visible,
                 style: TextStyle(
-                  fontFamily: 'JetBrains Mono',
+                  fontFamily: 'JetBrainsMono',
                   fontSize: 12,
                   color: cs.primary,
                   height: 1.4,

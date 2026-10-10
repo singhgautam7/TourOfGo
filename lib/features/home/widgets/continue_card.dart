@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:tourgo/core/utils/locale_font.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/tour_models.dart';
 import '../../../providers/lesson_position_provider.dart';
 import '../../../providers/progress_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../shared/widgets/go_tour_button.dart';
+import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/kuber_progress.dart';
 
 class ContinueCard extends ConsumerWidget {
   final Map<String, ChapterData> content;
@@ -21,7 +23,8 @@ class ContinueCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final chapter = content[position.chapterKey];
     if (chapter == null) return const SizedBox.shrink();
 
@@ -41,76 +44,47 @@ class ContinueCard extends ConsumerWidget {
         position.lessonIndex == 0;
 
     if (isFreshStart) {
-      return _AccentedCard(
-        cs: cs,
-        child: _EmptyVariantBody(
-          content: content,
-          onStart: onContinue,
-          cs: cs,
-        ),
+      return KuberCard(
+        hero: true,
+        child: _EmptyVariantBody(content: content, onStart: onContinue),
       );
     }
 
-    return _AccentedCard(
-      cs: cs,
+    // Hero card (Kuber stat-cards.md): caps label, the lesson as the headline,
+    // an 8dp progress bar, and the action.
+    return KuberCard(
+      hero: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'CONTINUE LEARNING',
-            style: GoogleFonts.inter(
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              color: cs.primary,
-              letterSpacing: 1.3,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Chapter: ${kChapterDisplayNames[position.chapterKey] ?? chapter.title} · Lesson $lessonNum of $totalLessons',
-            style: GoogleFonts.jetBrainsMono(
-              fontSize: 11,
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 2),
+          Text('CONTINUE LEARNING', style: sectionHeaderStyle(context)),
+          const SizedBox(height: KuberSpace.sm),
           if (lesson != null)
-            Text(
-              lesson.title,
-              style: GoogleFonts.inter(
-                fontSize: 19,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurface,
-                letterSpacing: -0.3,
-              ),
-            ),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(KuberRadius.full),
-            child: LinearProgressIndicator(
-              value: pct,
-              minHeight: 4,
-              backgroundColor: cs.surfaceContainerHigh,
-              valueColor: AlwaysStoppedAnimation(cs.primary),
-            ),
+            Text(lesson.title, style: theme.textTheme.titleLarge),
+          const SizedBox(height: KuberSpace.xs),
+          Text(
+            '${kChapterDisplayNames[position.chapterKey] ?? chapter.title} · Lesson $lessonNum of $totalLessons',
+            style: theme.textTheme.bodyMedium!
+                .copyWith(color: cs.onSurfaceVariant),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: KuberSpace.lg),
+          // The wavy M3 indicator, as in the readers' headers.
+          KuberLinearProgress(value: pct),
+          const SizedBox(height: KuberSpace.lg),
           Row(
             children: [
-              Text(
-                '${(pct * 100).round()}% of chapter',
-                style: GoogleFonts.jetBrainsMono(
-                  fontSize: 11,
-                  color: cs.onSurfaceVariant,
+              Expanded(
+                child: Text(
+                  '${(pct * 100).round()}% of chapter',
+                  style: theme.textTheme.bodySmall,
                 ),
               ),
-              const Spacer(),
-              GoTourButton(
+              AppButton(
                 label: 'Continue',
                 icon: Icons.arrow_forward_rounded,
                 iconAfterLabel: true,
-                type: GoTourButtonType.primary,
-                height: 42,
+                type: AppButtonType.primary,
+                height: 40,
                 onPressed: onContinue,
               ),
             ],
@@ -121,52 +95,15 @@ class ContinueCard extends ConsumerWidget {
   }
 }
 
-class _AccentedCard extends StatelessWidget {
-  final Widget child;
-  final ColorScheme cs;
-  const _AccentedCard({required this.child, required this.cs});
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      child: Container(
-        decoration: BoxDecoration(
-          color: cs.surfaceContainer,
-          border: Border.all(color: cs.outline),
-        ),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(width: 4, color: cs.primary),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(KuberSpacing.lg),
-                  child: child,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _EmptyVariantBody extends StatelessWidget {
   final Map<String, ChapterData> content;
   final VoidCallback onStart;
-  final ColorScheme cs;
 
-  const _EmptyVariantBody({
-    required this.content,
-    required this.onStart,
-    required this.cs,
-  });
+  const _EmptyVariantBody({required this.content, required this.onStart});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final totalChapters = content.length;
     final totalLessons =
         content.values.fold<int>(0, (a, ch) => a + ch.pages.length);
@@ -176,51 +113,30 @@ class _EmptyVariantBody extends StatelessWidget {
       children: [
         Row(
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: cs.primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(KuberRadius.md),
-                border:
-                    Border.all(color: cs.primary.withValues(alpha: 0.3)),
-              ),
-              child: Icon(Icons.flag_outlined,
-                  color: cs.primary, size: 22),
-            ),
-            const SizedBox(width: 12),
+            const KuberIconTile(icon: Icons.flag_outlined),
+            const SizedBox(width: KuberSpace.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Start your Go journey',
-                    style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: cs.onSurface,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
+                  Text('Start your Go journey',
+                      style: theme.textTheme.titleMedium),
                   Text(
                     '$totalChapters chapters · $totalLessons lessons',
-                    style: GoogleFonts.jetBrainsMono(
-                      fontSize: 11,
-                      color: cs.onSurfaceVariant,
-                    ),
+                    style: theme.textTheme.bodyMedium!.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant),
                   ),
                 ],
               ),
             ),
           ],
         ),
-        const SizedBox(height: 14),
-        GoTourButton(
+        const SizedBox(height: KuberSpace.lg),
+        AppButton(
           label: 'Begin first lesson',
           icon: Icons.arrow_forward_rounded,
           iconAfterLabel: true,
-          type: GoTourButtonType.primary,
+          type: AppButtonType.primary,
           fullWidth: true,
           onPressed: onStart,
         ),

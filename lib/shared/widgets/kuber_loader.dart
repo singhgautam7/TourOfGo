@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import '../../core/theme/app_theme.dart';
 
-/// Loading dialog — adapted from Kuber's KuberLoader.
-class GoTourLoader extends StatelessWidget {
+class KuberLoader extends StatelessWidget {
   final String label;
 
-  const GoTourLoader({super.key, this.label = 'Loading...'});
+  const KuberLoader({super.key, this.label = 'Loading...'});
 
   @override
   Widget build(BuildContext context) {
@@ -16,11 +15,11 @@ class GoTourLoader extends StatelessWidget {
       backgroundColor: Colors.transparent,
       elevation: 0,
       child: Container(
-        padding: const EdgeInsets.all(KuberSpacing.xl),
+        padding: const EdgeInsets.all(KuberSpace.xl),
         decoration: BoxDecoration(
           color: cs.surfaceContainer,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
+          borderRadius: BorderRadius.circular(KuberShape.largeIncreased),
+          border: Border.all(color: cs.outlineVariant),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -33,15 +32,11 @@ class GoTourLoader extends StatelessWidget {
                 strokeWidth: 3,
               ),
             ),
-            const SizedBox(height: KuberSpacing.lg),
+            const SizedBox(height: KuberSpace.lg),
             Text(
               label,
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurface,
-              ),
+              style: Theme.of(context).textTheme.titleSmall,
             ),
           ],
         ),
@@ -49,6 +44,8 @@ class GoTourLoader extends StatelessWidget {
     );
   }
 
+  /// Shows the loader over the route until [future] completes, then closes it
+  /// and returns (or rethrows) its result.
   static Future<T?> show<T>(
     BuildContext context, {
     String label = 'Loading...',
@@ -57,7 +54,7 @@ class GoTourLoader extends StatelessWidget {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => GoTourLoader(label: label),
+      builder: (_) => KuberLoader(label: label),
     );
     try {
       final result = await future;

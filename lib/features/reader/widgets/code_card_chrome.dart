@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:tourgo/core/utils/locale_font.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../providers/settings_provider.dart';
 
@@ -28,113 +28,52 @@ class CodeCardChrome extends ConsumerWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.largeR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(
-                KuberSpacing.lg, KuberSpacing.sm, KuberSpacing.sm, 0),
+                KuberSpace.lg, KuberSpace.sm, KuberSpace.sm, KuberSpace.sm),
             child: Row(
               children: [
-                Container(
-                  width: 7,
-                  height: 7,
-                  decoration: BoxDecoration(
-                    color: cs.primary,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     filename,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.jetBrainsMono(
-                      fontSize: 11,
+                    style: monoFont(
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurfaceVariant,
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: KuberSpace.sm),
                 if (trailing != null) ...[
                   trailing!,
-                  const SizedBox(width: 8),
+                  const SizedBox(width: KuberSpace.sm),
                 ],
-                _WrapToggle(
-                  wrap: wrap,
-                  onChanged: (v) => ref
+                // M3 filter chip (Kuber controls.md): r8, 32 high, selected
+                // secondaryContainer with a check.
+                FilterChip(
+                  label: const Text('Wrap'),
+                  selected: wrap,
+                  visualDensity: VisualDensity.compact,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  tooltip: wrap ? 'Wrap lines: on' : 'Wrap lines: off',
+                  onSelected: (v) => ref
                       .read(settingsNotifierProvider.notifier)
                       .setWrapLines(v),
-                  cs: cs,
                 ),
               ],
             ),
           ),
-          Divider(height: 12, color: cs.outline),
+          Divider(height: 1, color: cs.outlineVariant),
+          const SizedBox(height: KuberSpace.sm),
           body,
         ],
-      ),
-    );
-  }
-}
-
-class _WrapToggle extends StatelessWidget {
-  final bool wrap;
-  final ValueChanged<bool> onChanged;
-  final ColorScheme cs;
-
-  const _WrapToggle({
-    required this.wrap,
-    required this.onChanged,
-    required this.cs,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: wrap ? 'Wrap lines: on' : 'Wrap lines: off',
-      child: GestureDetector(
-        onTap: () => onChanged(!wrap),
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: wrap
-                ? cs.primary.withValues(alpha: 0.12)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(KuberRadius.full),
-            border: Border.all(
-              color: wrap
-                  ? cs.primary.withValues(alpha: 0.4)
-                  : cs.outline,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.wrap_text_rounded,
-                size: 13,
-                color: wrap ? cs.primary : cs.onSurfaceVariant,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                'WRAP',
-                style: GoogleFonts.inter(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  color: wrap ? cs.primary : cs.onSurfaceVariant,
-                  letterSpacing: 1.0,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

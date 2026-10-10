@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../providers/tour_content_provider.dart';
-import '../../../shared/widgets/tourgo_bottom_sheet.dart';
-import '../../../shared/widgets/go_tour_button.dart';
+import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_bottom_sheet.dart';
+import '../../../shared/widgets/kuber_list.dart';
 
 /// A small pill at the bottom of the home screen showing sync status
 /// and go.dev attribution. Tapping opens a detail bottom sheet.
@@ -64,10 +64,8 @@ class _AttributionPillState extends ConsumerState<AttributionPill>
   }
 
   void _showSyncSheet() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      useRootNavigator: true,
+    showKuberBottomSheet<void>(
+      context,
       builder: (_) => _SyncInfoSheet(
         lastFetchMs: widget.lastFetchMs,
         onRefresh: () async {
@@ -81,42 +79,36 @@ class _AttributionPillState extends ConsumerState<AttributionPill>
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
+    // A tonal stadium chip: surfaceContainerHigh, bodySmall, 48 tap height.
     return Center(
-      child: GestureDetector(
-        onTap: _showSyncSheet,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(KuberRadius.full),
-            border: Border.all(color: cs.outline, width: 0.5),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedBuilder(
-                animation: _spinCtrl,
-                builder: (_, child) => Transform.rotate(
-                  angle: _spinCtrl.value * 2 * 3.14159,
-                  child: child,
+      child: Material(
+        color: cs.surfaceContainerHigh,
+        shape: const StadiumBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: _showSyncSheet,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: KuberSpace.md, vertical: KuberSpace.sm),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedBuilder(
+                  animation: _spinCtrl,
+                  builder: (_, child) => Transform.rotate(
+                    angle: _spinCtrl.value * 2 * 3.14159,
+                    child: child,
+                  ),
+                  child: Icon(Icons.sync_rounded,
+                      size: 16, color: cs.onSurfaceVariant),
                 ),
-                child: Icon(
-                  Icons.sync_rounded,
-                  size: 12,
-                  color: cs.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                _syncText,
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  color: cs.onSurfaceVariant,
-                ),
-              ),
-            ],
+                const SizedBox(width: KuberSpace.sm),
+                Text(_syncText, style: theme.textTheme.bodySmall),
+              ],
+            ),
           ),
         ),
       ),
@@ -162,123 +154,53 @@ class _SyncInfoSheetState extends State<_SyncInfoSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final value =
+        theme.textTheme.bodyMedium!.copyWith(color: cs.onSurfaceVariant);
 
-    return TourGoBottomSheet(
-      title: 'Content Source',
+    return KuberBottomSheet(
+      title: 'Content source',
       subtitle: 'go.dev/tour',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      actions: AppButton(
+        label: _isRefreshing ? 'Refreshing…' : 'Refresh content',
+        icon: Icons.sync_rounded,
+        type: AppButtonType.primary,
+        fullWidth: true,
+        isLoading: _isRefreshing,
+        onPressed: _isRefreshing ? null : _handleRefresh,
+      ),
+      child: KuberGroup(
         children: [
-          // Source URL — tappable with accent color + arrow
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 90,
-                child: Text(
-                  'Source',
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  onTap: _openSourceUrl,
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          'go.dev/tour/lesson',
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 12,
-                            color: cs.primary,
-                            decoration: TextDecoration.underline,
-                            decorationColor: cs.primary.withValues(alpha: 0.5),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.arrow_outward_rounded,
-                        size: 14,
-                        color: cs.primary,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+          KuberListRow(
+            title: 'Source',
+            onTap: _openSourceUrl,
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('go.dev/tour/lesson',
+                    style: value.copyWith(color: cs.primary)),
+                const SizedBox(width: KuberSpace.xs),
+                Icon(Icons.arrow_outward_rounded,
+                    size: 16, color: cs.primary),
+              ],
+            ),
           ),
-          const SizedBox(height: KuberSpacing.md),
-          _InfoRow(
-            label: 'License',
-            value: 'BSD License · CC BY 3.0',
-            cs: cs,
+          KuberListRow(
+            title: 'License',
+            trailing: Text('BSD License · CC BY 3.0', style: value),
           ),
-          const SizedBox(height: KuberSpacing.md),
-          _InfoRow(
-            label: 'Last synced',
-            value: widget.lastFetchMs != null
-                ? formatLastUpdated(widget.lastFetchMs!)
-                : 'Never',
-            cs: cs,
-          ),
-          const SizedBox(height: KuberSpacing.xl),
-          GoTourButton(
-            label: _isRefreshing ? 'Refreshing…' : 'Refresh content',
-            icon: Icons.sync_rounded,
-            type: GoTourButtonType.primary,
-            fullWidth: true,
-            isLoading: _isRefreshing,
-            onPressed: _isRefreshing ? null : _handleRefresh,
+          KuberListRow(
+            title: 'Last synced',
+            trailing: Text(
+              widget.lastFetchMs != null
+                  ? formatLastUpdated(widget.lastFetchMs!)
+                  : 'Never',
+              style: value,
+            ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final ColorScheme cs;
-
-  const _InfoRow({
-    required this.label,
-    required this.value,
-    required this.cs,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 90,
-          child: Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: GoogleFonts.jetBrainsMono(
-              fontSize: 12,
-              color: cs.onSurface,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

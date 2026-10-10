@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../shared/widgets/go_tour_snackbar.dart';
+import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/kuber_progress.dart';
+import '../../../shared/widgets/nav_sheet.dart';
+import '../../../shared/widgets/timed_snackbar.dart';
 import '../models/download_state.dart';
 import '../models/go_example.dart';
 import '../providers/go_by_example_download_provider.dart';
@@ -10,20 +13,10 @@ import '../providers/go_by_example_index_provider.dart';
 
 /// Opens the "Download All Examples" bottom sheet.
 Future<void> showGbeDownloadSheet(BuildContext context) {
-  return showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    useRootNavigator: true,
-    builder: (_) => DraggableScrollableSheet(
-      initialChildSize: 0.7,
-      minChildSize: 0.4,
-      maxChildSize: 0.95,
-      snap: true,
-      snapSizes: const [0.4, 0.7, 0.95],
-      builder: (ctx, scrollController) =>
-          _DownloadSheet(scrollController: scrollController),
-    ),
+  return showNavSheet(
+    context,
+    builder: (scrollController) =>
+        _DownloadSheet(scrollController: scrollController),
   );
 }
 
@@ -34,162 +27,109 @@ class _DownloadSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final downloadState = ref.watch(goByExampleDownloadNotifierProvider);
     final indexState = ref.watch(goByExampleIndexNotifierProvider);
     final index = indexState.valueOrNull ?? const <GoExampleIndex>[];
+    final showProgress = downloadState.isRunning ||
+        downloadState.completed >
+            downloadState.alreadyDownloadedSlugs.length ||
+        downloadState.failed > 0;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(KuberRadius.lg),
-        ),
-        border: Border.all(color: cs.outline),
-      ),
+    return NavSheetFrame(
+      title: 'Download All Examples',
+      leading: const KuberIconTile(icon: Icons.download_for_offline_outlined),
       child: Column(
         children: [
-          // Drag handle.
-          Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 4),
-            child: Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: cs.onSurfaceVariant.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-          ),
-          // Header.
-          Padding(
-            padding:
-                const EdgeInsets.fromLTRB(20, 8, 16, KuberSpacing.sm),
-            child: Row(
-              children: [
-                Icon(Icons.download_for_offline_rounded,
-                    color: cs.primary, size: 22),
-                const SizedBox(width: KuberSpacing.md),
-                Expanded(
-                  child: Text(
-                    'Download All Examples',
-                    style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: cs.onSurface,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(KuberRadius.md),
-                      border: Border.all(color: cs.outline),
-                    ),
-                    child: Icon(Icons.close_rounded,
-                        size: 16, color: cs.onSurface),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Subtitle / status line.
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: _SubtitleText(
-                state: downloadState,
-                indexCount: index.length,
-              ),
-            ),
-          ),
-          const SizedBox(height: KuberSpacing.md),
-          // Overall progress.
-          if (downloadState.isRunning ||
-              downloadState.completed > downloadState.alreadyDownloadedSlugs.length ||
-              downloadState.failed > 0)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  LinearProgressIndicator(
-                    value: downloadState.total > 0
-                        ? downloadState.completed / downloadState.total
-                        : null,
-                    color: cs.primary,
-                    backgroundColor: cs.outline,
-                    borderRadius: BorderRadius.circular(KuberRadius.full),
-                    minHeight: 6,
-                  ),
-                  const SizedBox(height: KuberSpacing.sm),
-                  Text(
-                    '${downloadState.completed} of ${downloadState.total} downloaded'
-                    '${downloadState.failed > 0 ? ' · ${downloadState.failed} failed' : ''}',
-                    style: GoogleFonts.jetBrainsMono(
-                      fontSize: 11,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          const SizedBox(height: KuberSpacing.md),
-          Divider(height: 1, color: cs.outline),
-          // Example list.
           Expanded(
             child: index.isEmpty
                 ? Center(
                     child: indexState.isLoading
-                        ? CircularProgressIndicator(color: cs.primary)
+                        ? const CircularProgressIndicator()
                         : Text(
                             'No examples available.',
-                            style: GoogleFonts.inter(
-                                fontSize: 13,
-                                color: cs.onSurfaceVariant),
+                            style: theme.textTheme.bodyMedium!
+                                .copyWith(color: cs.onSurfaceVariant),
                           ),
                   )
-                : ListView.separated(
+                : SingleChildScrollView(
                     controller: scrollController,
-                    itemCount: index.length,
-                    separatorBuilder: (_, _) =>
-                        Divider(height: 1, color: cs.outline, indent: 52),
-                    itemBuilder: (_, i) {
-                      final entry = index[i];
-                      final status = _statusFor(downloadState, entry);
-                      return _DownloadRow(entry: entry, status: status);
-                    },
+                    padding: const EdgeInsets.fromLTRB(
+                        KuberSpace.screenMargin, 0, KuberSpace.screenMargin,
+                        KuberSpace.lg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _SubtitleText(
+                          state: downloadState,
+                          indexCount: index.length,
+                        ),
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOutCubic,
+                          child: !showProgress
+                              ? const SizedBox(width: double.infinity)
+                              : Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: KuberSpace.lg),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      KuberLinearProgress(
+                                        value: downloadState.total > 0
+                                            ? downloadState.completed /
+                                                downloadState.total
+                                            : 0,
+                                      ),
+                                      const SizedBox(height: KuberSpace.sm),
+                                      Text(
+                                        '${downloadState.completed} of ${downloadState.total} downloaded'
+                                        '${downloadState.failed > 0 ? ' · ${downloadState.failed} failed' : ''}',
+                                        style: theme.textTheme.bodySmall,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                        ),
+                        const SizedBox(height: KuberSpace.lg),
+                        KuberGroup(
+                          children: [
+                            for (final entry in index)
+                              _DownloadRow(
+                                entry: entry,
+                                status: _statusFor(downloadState, entry),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
           ),
-          // Action row.
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-                20, KuberSpacing.md, 20, KuberSpacing.lg),
-            child: _ActionRow(
-              state: downloadState,
-              indexCount: index.length,
-              onCancel: () => ref
-                  .read(goByExampleDownloadNotifierProvider.notifier)
-                  .cancel(),
-              onStart: () {
-                final allDone =
-                    downloadState.alreadyDownloadedSlugs.length >=
-                            index.length &&
-                        index.isNotEmpty;
-                ref
+          // Pinned actions (Kuber sheets: 16 / 20 / 24).
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+              child: _ActionRow(
+                state: downloadState,
+                indexCount: index.length,
+                onCancel: () => ref
                     .read(goByExampleDownloadNotifierProvider.notifier)
-                    .startDownload(index, forceRefresh: allDone);
-                showGoTourSnackBar(context,
-                    'Downloading examples... Keep the app open.');
-              },
+                    .cancel(),
+                onStart: () {
+                  final allDone =
+                      downloadState.alreadyDownloadedSlugs.length >=
+                              index.length &&
+                          index.isNotEmpty;
+                  ref
+                      .read(goByExampleDownloadNotifierProvider.notifier)
+                      .startDownload(index, forceRefresh: allDone);
+                  showKuberSnackBar(context,
+                      'Downloading examples... Keep the app open.');
+                },
+              ),
             ),
           ),
         ],
@@ -247,7 +187,7 @@ class _SubtitleText extends StatelessWidget {
 
     return Text(
       message,
-      style: GoogleFonts.inter(fontSize: 13, color: color, height: 1.5),
+      style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: color),
     );
   }
 }
@@ -267,22 +207,13 @@ class _ActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     if (state.isRunning) {
-      return SizedBox(
-        width: double.infinity,
-        child: OutlinedButton.icon(
-          onPressed: onCancel,
-          icon: Icon(Icons.stop_rounded, color: cs.error, size: 18),
-          label: Text(
-            'Cancel Download',
-            style: TextStyle(color: cs.error),
-          ),
-          style: OutlinedButton.styleFrom(
-            side: BorderSide(color: cs.error.withValues(alpha: 0.5)),
-          ),
-        ),
+      return AppButton(
+        label: 'Cancel Download',
+        icon: Icons.stop_rounded,
+        type: AppButtonType.danger,
+        fullWidth: true,
+        onPressed: onCancel,
       );
     }
 
@@ -290,16 +221,12 @@ class _ActionRow extends StatelessWidget {
         state.alreadyDownloadedSlugs.length >= indexCount;
     final startLabel = allDone ? 'Refresh All' : 'Proceed with Download';
 
-    return SizedBox(
-      width: double.infinity,
-      child: FilledButton.icon(
-        onPressed: indexCount == 0 ? null : onStart,
-        icon: Icon(
-          allDone ? Icons.refresh_rounded : Icons.download_rounded,
-          size: 18,
-        ),
-        label: Text(startLabel),
-      ),
+    return AppButton(
+      label: startLabel,
+      icon: allDone ? Icons.refresh_rounded : Icons.download_rounded,
+      type: AppButtonType.primary,
+      fullWidth: true,
+      onPressed: indexCount == 0 ? null : onStart,
     );
   }
 }
@@ -315,65 +242,39 @@ class _DownloadRow extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     final trailing = switch (status.status) {
-      DownloadStatus.alreadyDownloaded =>
-        Icon(Icons.check_circle_rounded, size: 18, color: cs.primary),
-      DownloadStatus.done =>
-        Icon(Icons.check_circle_rounded, size: 18, color: cs.primary),
-      DownloadStatus.downloading => SizedBox(
-          width: 16,
-          height: 16,
-          child: CircularProgressIndicator(
-              strokeWidth: 2, color: cs.primary),
+      DownloadStatus.alreadyDownloaded => Icon(
+          Icons.check_circle_outline_rounded, size: 20, color: cs.primary),
+      DownloadStatus.done => Icon(
+          Icons.check_circle_outline_rounded, size: 20, color: cs.primary),
+      DownloadStatus.downloading => const SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
         ),
       DownloadStatus.failed =>
-        Icon(Icons.error_outline_rounded, size: 18, color: cs.error),
-      DownloadStatus.pending => Icon(
-          Icons.radio_button_unchecked_rounded,
-          size: 18,
-          color: cs.onSurfaceVariant.withValues(alpha: 0.3),
-        ),
+        Icon(Icons.error_outline_rounded, size: 20, color: cs.error),
+      DownloadStatus.pending => Icon(Icons.radio_button_unchecked_rounded,
+          size: 20, color: cs.outline),
     };
 
+    final theme = Theme.of(context);
     final isActive = status.status == DownloadStatus.downloading;
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: 20, vertical: KuberSpacing.md),
-      child: Row(
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(KuberRadius.sm),
-              border: Border.all(color: cs.outline),
-            ),
-            child: Text(
-              '${entry.order + 1}',
-              style: GoogleFonts.jetBrainsMono(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurfaceVariant,
-              ),
-            ),
+    return KuberListRow(
+      dense: true,
+      selected: isActive,
+      minHeight: KuberSpace.tapTarget,
+      leading: SizedBox(
+        width: 24,
+        child: Text(
+          '${entry.order + 1}',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.labelMedium!.copyWith(
+            color: isActive ? cs.onSecondaryContainer : cs.onSurfaceVariant,
           ),
-          const SizedBox(width: KuberSpacing.md),
-          Expanded(
-            child: Text(
-              entry.title,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                fontWeight:
-                    isActive ? FontWeight.w700 : FontWeight.w500,
-                color: isActive ? cs.primary : cs.onSurface,
-              ),
-            ),
-          ),
-          trailing,
-        ],
+        ),
       ),
+      title: entry.title,
+      trailing: trailing,
     );
   }
 }
