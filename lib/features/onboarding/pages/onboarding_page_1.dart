@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/theme/app_theme.dart';
-import '../widgets/go_illustration_painter.dart';
 import '../widgets/onboarding_dots_indicator.dart';
 
 class OnboardingPage1 extends StatelessWidget {
@@ -29,8 +27,6 @@ class OnboardingPage1 extends StatelessWidget {
               height: 48,
               child: Row(
                 children: [
-                  _GoMarkIcon(cs: cs),
-                  const SizedBox(width: 10),
                   Text(
                     'Tour of Go',
                     style: GoogleFonts.inter(
@@ -62,7 +58,16 @@ class OnboardingPage1 extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(child: const GoIllustrationAnimation()),
+                  // The app icon's own Go glyph, in its night tones on dark.
+                  Center(
+                    child: Image.asset(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? 'assets/go_mark_dark.png'
+                          : 'assets/go_mark.png',
+                      width: 180,
+                      height: 180,
+                    ),
+                  ),
                   const SizedBox(height: 32),
                   Text(
                     'Go,\nfrom zero.',
@@ -118,27 +123,6 @@ class OnboardingPage1 extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _GoMarkIcon extends StatelessWidget {
-  final ColorScheme cs;
-  const _GoMarkIcon({required this.cs});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.3)),
-      ),
-      child: Center(
-        child: Icon(Icons.circle_outlined, color: cs.primary, size: 16),
       ),
     );
   }

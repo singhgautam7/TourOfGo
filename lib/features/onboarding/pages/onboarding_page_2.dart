@@ -43,8 +43,6 @@ class OnboardingPage2 extends StatelessWidget {
               height: 48,
               child: Row(
                 children: [
-                  _GoMark(cs: cs),
-                  const SizedBox(width: 10),
                   Text(
                     'Tour of Go',
                     style: GoogleFonts.inter(
@@ -189,27 +187,6 @@ class _FeatureCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _GoMark extends StatelessWidget {
-  final ColorScheme cs;
-  const _GoMark({required this.cs});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.3)),
-      ),
-      child: Center(
-        child: Icon(Icons.circle_outlined, color: cs.primary, size: 16),
       ),
     );
   }

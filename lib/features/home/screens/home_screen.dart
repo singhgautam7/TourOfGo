@@ -77,8 +77,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       // App bar row
                       Row(
                         children: [
-                          _GoMarkWidget(cs: cs),
-                          const SizedBox(width: 10),
                           Text(
                             'A Tour of Go',
                             style: GoogleFonts.inter(
@@ -543,24 +541,6 @@ class _ErrorCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _GoMarkWidget extends StatelessWidget {
-  final ColorScheme cs;
-  const _GoMarkWidget({required this.cs});
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(KuberRadius.md),
-      child: Image.asset(
-        'assets/go_brand.png',
-        width: 32,
-        height: 32,
-        fit: BoxFit.cover,
       ),
     );
   }

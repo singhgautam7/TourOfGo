@@ -28,8 +28,37 @@ dev_dependencies:
   riverpod_generator: ^2.6.5
   custom_lint: ^0.7.5
   riverpod_lint: ^2.6.5
+  flutter_native_splash: ^2.4.8
 
 flutter:
   uses-material-design: true
   assets:
     - assets/
+
+# The launcher icon is the icon family's own vector drawable, converted from
+# `specs/design/app-icon/` into `android/app/src/main/res/`: an adaptive icon with
+# a monochrome layer for Android 13's themed icons. `flutter_launcher_icons` is
+# deliberately not used, because it would replace that vector with rasterised
+# PNGs. The legacy PNGs for Android before adaptive icons and the splash art
+# below are rendered from the same SVGs.
+
+flutter_native_splash:
+  # The pale ground of the icon itself, so the splash reads as the launcher
+  # icon holding still rather than as a different screen.
+  color: "#C8EFFE"
+  color_dark: "#041E26"
+  image: assets/icon/splash.png
+  image_dark: assets/icon/splash_dark.png
+  android_12:
+    # Android 12 masks its splash icon to a circle and shows only the middle of
+    # it, so this art is the glyph alone on transparent and the ground is the
+    # colour below. Passing the whole icon here gets it cropped.
+    image: assets/icon/splash_android12.png
+    image_dark: assets/icon/splash_android12_dark.png
+    icon_background_color: "#C8EFFE"
+    icon_background_color_dark: "#041E26"
+    color: "#C8EFFE"
+    color_dark: "#041E26"
+  android: true
+  ios: false
+  web: false
