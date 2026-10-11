@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:tourgo/core/utils/locale_font.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/html_parser.dart';
 import '../../../providers/settings_provider.dart';
@@ -37,11 +37,11 @@ class LessonContentView extends ConsumerWidget {
       ContentBlock block, BuildContext context, ColorScheme cs, bool wrap) {
     if (block is ParagraphBlock) {
       return Padding(
-        padding: const EdgeInsets.only(bottom: KuberSpacing.md),
+        padding: const EdgeInsets.only(bottom: KuberSpace.md),
         child: Text.rich(
           TextSpan(
             children: block.spans,
-            style: GoogleFonts.inter(
+            style: localeFont(
               fontSize: fontSize,
               color: cs.onSurface,
               height: 1.55,
@@ -54,7 +54,7 @@ class LessonContentView extends ConsumerWidget {
     if (block is CodePreBlock) {
       final preText = SelectableText(
         block.code,
-        style: GoogleFonts.jetBrainsMono(
+        style: monoFont(
           fontSize: 12.5,
           color: cs.onSurface,
           height: 1.55,
@@ -62,13 +62,13 @@ class LessonContentView extends ConsumerWidget {
         ),
       );
       return Container(
-        margin: const EdgeInsets.only(bottom: KuberSpacing.md),
+        margin: const EdgeInsets.only(bottom: KuberSpace.md),
         decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          border: Border.all(color: cs.outline),
+          color: cs.surfaceContainer,
+          borderRadius: KuberShape.largeR,
+          border: Border.all(color: cs.outlineVariant),
         ),
-        padding: const EdgeInsets.all(KuberSpacing.md),
+        padding: const EdgeInsets.all(KuberSpace.lg),
         child: wrap
             ? preText
             : SingleChildScrollView(
@@ -80,7 +80,7 @@ class LessonContentView extends ConsumerWidget {
 
     if (block is BulletListBlock) {
       return Padding(
-        padding: const EdgeInsets.only(bottom: KuberSpacing.md),
+        padding: const EdgeInsets.only(bottom: KuberSpace.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: block.items.map((item) {
@@ -105,7 +105,7 @@ class LessonContentView extends ConsumerWidget {
                     child: Text.rich(
                       TextSpan(
                         children: item,
-                        style: GoogleFonts.inter(
+                        style: localeFont(
                           fontSize: fontSize,
                           color: cs.onSurface,
                           height: 1.55,

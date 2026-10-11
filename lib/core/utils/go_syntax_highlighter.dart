@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:tourgo/core/utils/locale_font.dart';
 import '../../core/theme/code_colors.dart';
 
 const _noLigatures = <FontFeature>[
@@ -142,7 +142,7 @@ class GoSyntaxHighlighter {
   static bool _isAlphaNum(String c) => _isAlpha(c) || _isDigit(c);
 
   static TextSpan _toSpan(_Token tok, bool isDark) {
-    final baseStyle = GoogleFonts.jetBrainsMono(
+    final baseStyle = monoFont(
       fontSize: 13,
       height: 1.6,
       fontFeatures: _noLigatures,

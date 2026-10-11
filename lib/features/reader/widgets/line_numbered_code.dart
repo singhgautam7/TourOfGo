@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:tourgo/core/utils/locale_font.dart';
 import '../../../core/theme/app_theme.dart';
 
 const _noLigatures = <FontFeature>[
@@ -35,7 +35,7 @@ class LineNumberedCode extends StatelessWidget {
     final lineCount = lines.length;
     final gutterWidth = (lineCount.toString().length * 9.0) + 16.0;
 
-    final gutterStyle = GoogleFonts.jetBrainsMono(
+    final gutterStyle = monoFont(
       fontSize: codeStyle.fontSize,
       height: codeStyle.height,
       color: cs.onSurfaceVariant.withValues(alpha: 0.5),
@@ -44,7 +44,7 @@ class LineNumberedCode extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        const dividerInset = KuberSpacing.md;
+        const dividerInset = KuberSpace.md;
         final bodyMaxWidth =
             (constraints.maxWidth - gutterWidth - dividerInset)
                 .clamp(0.0, double.infinity);
@@ -72,7 +72,7 @@ class LineNumberedCode extends StatelessWidget {
             Container(
               width: gutterWidth,
               decoration: BoxDecoration(
-                border: Border(right: BorderSide(color: cs.outline)),
+                border: Border(right: BorderSide(color: cs.outlineVariant)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,

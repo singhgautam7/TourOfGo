@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:tourgo/core/utils/locale_font.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/go_syntax_highlighter.dart';
 import '../../../providers/settings_provider.dart';
 import '../../reader/widgets/code_card_chrome.dart';
 import '../../reader/widgets/line_numbered_code.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../models/go_example.dart';
 
 /// Renders a fully-downloaded [GoExample]: title, annotation+code segments,
@@ -22,8 +23,6 @@ class ExampleContentView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     return NotificationListener<ScrollStartNotification>(
       onNotification: (_) {
         FocusScope.of(context).unfocus();
@@ -31,21 +30,14 @@ class ExampleContentView extends StatelessWidget {
       },
       child: SingleChildScrollView(
         controller: scrollController,
-        padding: const EdgeInsets.all(KuberSpacing.lg),
+        padding: const EdgeInsets.fromLTRB(KuberSpace.screenMargin,
+            KuberSpace.lg, KuberSpace.screenMargin, KuberSpace.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              example.title,
-              style: GoogleFonts.inter(
-                fontSize: 26,
-                fontWeight: FontWeight.w800,
-                color: cs.onSurface,
-                letterSpacing: -0.6,
-                height: 1.15,
-              ),
-            ),
-            const SizedBox(height: KuberSpacing.lg),
+            Text(example.title,
+                style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: KuberSpace.lg),
             _CombinedExampleView(
               code: example.segments
                   .map((s) => s.code)
@@ -58,7 +50,7 @@ class ExampleContentView extends StatelessWidget {
                   .join('\n\n'),
               filename: '${example.slug}.go',
             ),
-            const SizedBox(height: KuberSpacing.xxl),
+            const SizedBox(height: KuberSpace.xxl),
           ],
         ),
       ),
@@ -85,7 +77,7 @@ class _CombinedExampleView extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final wrap = ref.watch(settingsNotifierProvider).wrapLines;
 
-    final codeStyle = GoogleFonts.jetBrainsMono(
+    final codeStyle = monoFont(
       fontSize: 13,
       height: 1.6,
       fontFeatures: const [
@@ -101,7 +93,7 @@ class _CombinedExampleView extends ConsumerWidget {
           CodeCardChrome(
             filename: filename,
             body: Padding(
-              padding: const EdgeInsets.only(bottom: KuberSpacing.lg),
+              padding: const EdgeInsets.only(bottom: KuberSpace.lg),
               child: LineNumberedCode(
                 text: code,
                 codeStyle: codeStyle,
@@ -125,20 +117,19 @@ class _CombinedExampleView extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
         ],
         if (output.isNotEmpty) ...[
           _ShellOutputCard(output: output),
-          const SizedBox(height: KuberSpacing.lg),
+          const SizedBox(height: KuberSpace.lg),
         ],
         if (text.isNotEmpty)
           Text(
             text,
-            style: GoogleFonts.inter(
-              fontSize: 14.5,
-              color: cs.onSurface,
-              height: 1.6,
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge!
+                .copyWith(color: cs.onSurface, height: 1.6),
           ),
       ],
     );
@@ -153,44 +144,23 @@ class _ShellOutputCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration:
-                  BoxDecoration(color: cs.primary, shape: BoxShape.circle),
-            ),
-            const SizedBox(width: KuberSpacing.sm),
-            Text(
-              'OUTPUT',
-              style: GoogleFonts.inter(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.2,
-                color: cs.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: KuberSpacing.sm),
+        const KuberSectionHeader(title: 'Output'),
+        // A tonal container: the result, not more code.
         Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(KuberSpacing.lg),
+          padding: const EdgeInsets.all(KuberSpace.lg),
           decoration: BoxDecoration(
-            color: cs.primary.withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-            border: Border.all(color: cs.primary.withValues(alpha: 0.25)),
+            color: cs.secondaryContainer,
+            borderRadius: KuberShape.largeR,
           ),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SelectableText(
               output,
-              style: GoogleFonts.jetBrainsMono(
+              style: monoFont(
                 fontSize: 12,
-                color: cs.onSurface,
+                color: cs.onSecondaryContainer,
                 height: 1.6,
               ),
             ),

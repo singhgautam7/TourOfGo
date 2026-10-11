@@ -1,322 +1,369 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-// ── Spacing constants (same values as Kuber) ─────────────────────────────────
-class KuberSpacing {
-  static const xs = 4.0;
-  static const sm = 8.0;
-  static const md = 12.0;
-  static const lg = 16.0;
-  static const xl = 24.0;
-  static const xxl = 32.0;
+import '../utils/locale_font.dart';
+
+// Tokens and theme ported from Kuber `core/theme/app_theme.dart` (the M3
+// round-1 design system, tokens.md §1, §2, §8). Kuber names are kept so the
+// two apps read the same.
+
+/// Spacing: the 4/8 scale plus the layout metrics that are defined once.
+abstract final class KuberSpace {
+  static const double xs = 4;
+  static const double sm = 8;
+  static const double md = 12;
+  static const double lg = 16;
+  static const double xl = 24;
+  static const double xxl = 32;
+  static const double xxxl = 48;
+
+  /// Horizontal edge of every screen.
+  static const double screenMargin = 20;
+
+  /// Between sections.
+  static const double sectionGap = 28;
+
+  /// Section header to its content.
+  static const double sectionHeaderGap = 8;
+
+  /// Between stacked cards / tiles.
+  static const double cardGap = 12;
+  static const double cardPadding = 16;
+
+  /// The one hero card per screen.
+  static const double cardPaddingHero = 20;
+
+  static const double listItem1 = 56;
+  static const double listItem2 = 72;
+  static const double listItem3 = 88;
+  static const double listRowPadH = 16;
+  static const double listRowPadV = 8;
+  static const double tapTarget = 48;
 }
 
-// ── Radius constants (same values as Kuber) ───────────────────────────────────
-class KuberRadius {
-  static const sm = 4.0;
-  static const md = 8.0;
-  static const lg = 12.0;
-  static const xl = 24.0;
-  static const full = 999.0;
+/// Shape scale. Rounded, never squircle.
+abstract final class KuberShape {
+  static const double none = 0;
+
+  /// Bar tops.
+  static const double extraSmall = 4;
+
+  /// Chips, tooltips, inline badges.
+  static const double small = 8;
+
+  /// Tiles, menu rows, inner tiles in cards.
+  static const double medium = 12;
+
+  /// Text fields, snackbar, nested containers, code blocks.
+  static const double large = 16;
+
+  /// Cards, grouped lists, menus.
+  static const double largeIncreased = 20;
+
+  /// Sheets (top), dialogs.
+  static const double extraLarge = 28;
+
+  /// Buttons, icon buttons, FAB, segmented, progress, badges.
+  static const double full = 999;
+
+  static const BorderRadius smallR = BorderRadius.all(Radius.circular(small));
+  static const BorderRadius mediumR = BorderRadius.all(Radius.circular(medium));
+  static const BorderRadius largeR = BorderRadius.all(Radius.circular(large));
+  static const BorderRadius cardR =
+      BorderRadius.all(Radius.circular(largeIncreased));
+  static const BorderRadius sheetR =
+      BorderRadius.vertical(top: Radius.circular(extraLarge));
+  static const BorderRadius fullR = BorderRadius.all(Radius.circular(full));
 }
 
-// ── Dark theme color palette ──────────────────────────────────────────────────
-class GoTourColors {
-  static const background = Color(0xFF000000);
-  static const surfaceCard = Color(0xFF0D0D10);
-  static const surfaceMuted = Color(0xFF18181B);
-  static const border = Color(0xFF27272A);
-  static const borderMuted = Color(0xFF3F3F46);
-  static const textPrimary = Color(0xFFFAFAFA);
-  static const textSecondary = Color(0xFFA1A1AA);
-  static const accent = Color(0xFF29B6D5); // Go cyan — dark mode
-  static const accentSubtle = Color(0x1A29B6D5);
-}
+/// Motion tokens (from Perch `Motion`, via Kuber).
+abstract final class KuberMotion {
+  static const Duration instant = Duration(milliseconds: 90);
+  static const Duration fast = Duration(milliseconds: 150);
+  static const Duration standard = Duration(milliseconds: 220);
+  static const Duration reducedFade = Duration(milliseconds: 90);
 
-// ── Light theme color palette ─────────────────────────────────────────────────
-class GoTourLightColors {
-  static const background = Color(0xFFFFFFFF);
-  static const surfaceCard = Color(0xFFFAFAFA);
-  static const surfaceMuted = Color(0xFFF4F4F5);
-  static const border = Color(0xFFE4E4E7);
-  static const borderMuted = Color(0xFFD4D4D8);
-  static const textPrimary = Color(0xFF09090B);
-  static const textSecondary = Color(0xFF71717A);
-  static const accent = Color(0xFF00ACD7); // Go cyan — light mode
-  static const accentSubtle = Color(0x1A00ACD7);
-}
+  /// Anything the finger caused.
+  static const Curve spring = Curves.easeOutBack;
 
-// ── App theme builder ─────────────────────────────────────────────────────────
-class AppTheme {
-  static ThemeData dark() {
-    final textTheme = GoogleFonts.interTextTheme(ThemeData.dark().textTheme);
+  /// Anything the system caused.
+  static const Curve decelerate = Curves.easeOutCubic;
 
-    const cs = ColorScheme.dark(
-      surface: GoTourColors.background,
-      onSurface: GoTourColors.textPrimary,
-      onSurfaceVariant: GoTourColors.textSecondary,
-      primary: GoTourColors.accent,
-      onPrimary: Colors.white,
-      primaryContainer: GoTourColors.accentSubtle,
-      onPrimaryContainer: GoTourColors.accent,
-      secondary: GoTourColors.accent,
-      onSecondary: Colors.white,
-      error: Color(0xFFEF4444),
-      onError: Colors.white,
-      errorContainer: Color(0x1AEF4444),
-      onErrorContainer: Color(0xFFEF4444),
-      surfaceContainer: GoTourColors.surfaceCard,
-      surfaceContainerHigh: GoTourColors.surfaceMuted,
-      outline: GoTourColors.border,
-      outlineVariant: GoTourColors.border,
-    );
-
-    return ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.dark,
-      colorScheme: cs,
-      textTheme: textTheme,
-      splashFactory: NoSplash.splashFactory,
-      scaffoldBackgroundColor: GoTourColors.background,
-      cardTheme: CardThemeData(
-        color: GoTourColors.surfaceCard,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          side: const BorderSide(color: GoTourColors.border),
-        ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: GoTourColors.surfaceCard,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide: const BorderSide(color: GoTourColors.border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide: const BorderSide(color: GoTourColors.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide: const BorderSide(color: GoTourColors.accent, width: 2),
-        ),
-        hintStyle: const TextStyle(color: GoTourColors.textSecondary),
-        labelStyle: const TextStyle(color: GoTourColors.textSecondary),
-      ),
-      dividerTheme: const DividerThemeData(
-        color: GoTourColors.border,
-        thickness: 0.5,
-      ),
-      appBarTheme: AppBarTheme(
-        backgroundColor: GoTourColors.background,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        titleTextStyle: textTheme.titleLarge?.copyWith(
-          color: GoTourColors.textPrimary,
-        ),
-      ),
-      snackBarTheme: SnackBarThemeData(
-        backgroundColor: GoTourColors.surfaceCard,
-        contentTextStyle: textTheme.bodyMedium?.copyWith(
-          color: GoTourColors.textPrimary,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          side: const BorderSide(color: GoTourColors.border),
-        ),
-        behavior: SnackBarBehavior.floating,
-        elevation: 0,
-      ),
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: GoTourColors.surfaceCard,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(KuberRadius.lg),
-          ),
-          side: BorderSide(color: GoTourColors.border),
-        ),
-      ),
-      dialogTheme: DialogThemeData(
-        backgroundColor: GoTourColors.surfaceCard,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          side: const BorderSide(color: GoTourColors.border),
-        ),
-      ),
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          backgroundColor: GoTourColors.accent,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-          ),
-        ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: GoTourColors.textPrimary,
-          side: const BorderSide(color: GoTourColors.border),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-          ),
-        ),
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: GoTourColors.accent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-          ),
-        ),
-      ),
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: GoTourColors.accent,
-        linearTrackColor: GoTourColors.surfaceMuted,
-      ),
-      popupMenuTheme: PopupMenuThemeData(
-        color: GoTourColors.surfaceMuted,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-        ),
-      ),
-    );
+  static bool reduced(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    return mq.disableAnimations || mq.accessibleNavigation;
   }
 
-  static ThemeData light() {
-    final textTheme = GoogleFonts.interTextTheme(ThemeData.light().textTheme);
+  static Duration of(BuildContext context, Duration full) =>
+      reduced(context) ? reducedFade : full;
+}
 
-    const cs = ColorScheme.light(
-      surface: GoTourLightColors.background,
-      onSurface: GoTourLightColors.textPrimary,
-      onSurfaceVariant: GoTourLightColors.textSecondary,
-      primary: GoTourLightColors.accent,
-      onPrimary: Colors.white,
-      primaryContainer: GoTourLightColors.accentSubtle,
-      onPrimaryContainer: GoTourLightColors.accent,
-      secondary: GoTourLightColors.accent,
-      onSecondary: Colors.white,
-      error: Color(0xFFDC2626),
-      onError: Colors.white,
-      errorContainer: Color(0x1ADC2626),
-      onErrorContainer: Color(0xFFDC2626),
-      surfaceContainer: GoTourLightColors.surfaceCard,
-      surfaceContainerHigh: GoTourLightColors.surfaceMuted,
-      outline: GoTourLightColors.border,
-      outlineVariant: GoTourLightColors.borderMuted,
-    );
+/// Go cyan, go.dev's brand colour, as the seed.
+const _goCyan = Color(0xFF00ACD7);
+
+/// Material's own tonal scheme for Go cyan (the vibrant variant): surfaces
+/// carry a cool tint instead of plain white and grey, containers are pale
+/// tones that always take dark text, and only filled elements (primary) are
+/// deep cyan with white text. Fidelity was tried first; it makes
+/// primaryContainer the raw seed, a bright cyan that read flushed and mixed
+/// white and dark text on the same screen.
+ColorScheme _scheme(Brightness b) {
+  final scheme = ColorScheme.fromSeed(
+    seedColor: _goCyan,
+    brightness: b,
+    dynamicSchemeVariant: DynamicSchemeVariant.vibrant,
+  );
+  // Dark drops the page to true black, as Kuber does.
+  return b == Brightness.dark
+      ? scheme.copyWith(
+          surface: const Color(0xFF000000),
+          surfaceContainerLowest: const Color(0xFF000000),
+        )
+      : scheme;
+}
+
+class AppTheme {
+  static ThemeData light() => _light;
+  static ThemeData dark() => _dark;
+
+  static final ThemeData _light = _build(_scheme(Brightness.light));
+  static final ThemeData _dark = _build(_scheme(Brightness.dark));
+
+  static ThemeData _build(ColorScheme cs) {
+    final text = buildTextTheme(cs);
+    const stadium = StadiumBorder();
+    final labelLarge = text.labelLarge!;
 
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
+      brightness: cs.brightness,
       colorScheme: cs,
-      textTheme: textTheme,
-      splashFactory: NoSplash.splashFactory,
-      scaffoldBackgroundColor: GoTourLightColors.background,
+      fontFamily: 'Inter',
+      textTheme: text,
+      splashFactory: InkSparkle.splashFactory,
+      scaffoldBackgroundColor: cs.surface,
+      canvasColor: cs.surface,
       cardTheme: CardThemeData(
-        color: GoTourLightColors.surfaceCard,
+        color: cs.surfaceContainer,
         elevation: 0,
+        margin: EdgeInsets.zero,
+        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          side: const BorderSide(color: GoTourLightColors.border),
+          borderRadius: KuberShape.cardR,
+          side: BorderSide(color: cs.outlineVariant),
         ),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: cs.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleTextStyle: text.titleLarge,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: GoTourLightColors.surfaceCard,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide: const BorderSide(color: GoTourLightColors.border),
+        fillColor: cs.surfaceContainerHigh,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: const OutlineInputBorder(
+          borderRadius: KuberShape.largeR,
+          borderSide: BorderSide.none,
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide: const BorderSide(color: GoTourLightColors.border),
+        enabledBorder: const OutlineInputBorder(
+          borderRadius: KuberShape.largeR,
+          borderSide: BorderSide.none,
+        ),
+        disabledBorder: const OutlineInputBorder(
+          borderRadius: KuberShape.largeR,
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          borderSide:
-              const BorderSide(color: GoTourLightColors.accent, width: 2),
+          borderRadius: KuberShape.largeR,
+          borderSide: BorderSide(color: cs.primary, width: 2),
         ),
-        hintStyle:
-            const TextStyle(color: GoTourLightColors.textSecondary),
-        labelStyle:
-            const TextStyle(color: GoTourLightColors.textSecondary),
-      ),
-      dividerTheme: const DividerThemeData(
-        color: GoTourLightColors.border,
-        thickness: 0.5,
-      ),
-      appBarTheme: AppBarTheme(
-        backgroundColor: GoTourLightColors.background,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        titleTextStyle: textTheme.titleLarge?.copyWith(
-          color: GoTourLightColors.textPrimary,
+        errorBorder: OutlineInputBorder(
+          borderRadius: KuberShape.largeR,
+          borderSide: BorderSide(color: cs.error, width: 2),
         ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: KuberShape.largeR,
+          borderSide: BorderSide(color: cs.error, width: 2),
+        ),
+        hintStyle: text.bodyLarge!.copyWith(color: cs.onSurfaceVariant),
+        labelStyle: text.bodyLarge!.copyWith(color: cs.onSurfaceVariant),
+        floatingLabelStyle: text.bodySmall!.copyWith(color: cs.primary),
+        helperStyle: text.bodySmall!.copyWith(color: cs.onSurfaceVariant),
+        counterStyle: text.bodySmall!.copyWith(color: cs.onSurfaceVariant),
+        errorStyle: text.bodySmall!.copyWith(color: cs.error),
+        prefixIconColor: cs.onSurfaceVariant,
+        suffixIconColor: cs.onSurfaceVariant,
+      ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: cs.primary,
+        selectionColor: cs.primary.withValues(alpha: 0.3),
+        selectionHandleColor: cs.primary,
+      ),
+      dividerTheme: DividerThemeData(
+        color: cs.outlineVariant,
+        thickness: 1,
+        space: 1,
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: GoTourLightColors.surfaceCard,
-        contentTextStyle: textTheme.bodyMedium?.copyWith(
-          color: GoTourLightColors.textPrimary,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          side: const BorderSide(color: GoTourLightColors.border),
-        ),
+        backgroundColor: cs.inverseSurface,
+        contentTextStyle:
+            text.bodyMedium!.copyWith(color: cs.onInverseSurface),
+        actionTextColor: cs.inversePrimary,
+        shape: const RoundedRectangleBorder(borderRadius: KuberShape.largeR),
         behavior: SnackBarBehavior.floating,
         elevation: 0,
       ),
-      bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: GoTourLightColors.surfaceCard,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(KuberRadius.lg),
-          ),
-          side: BorderSide(color: GoTourLightColors.border),
-        ),
+      chipTheme: ChipThemeData(
+        backgroundColor: Colors.transparent,
+        selectedColor: cs.secondaryContainer,
+        disabledColor: cs.onSurface.withValues(alpha: 0.12),
+        side: WidgetStateBorderSide.resolveWith((s) =>
+            s.contains(WidgetState.selected)
+                ? BorderSide.none
+                : BorderSide(color: cs.outlineVariant)),
+        checkmarkColor: cs.onSecondaryContainer,
+        showCheckmark: true,
+        labelStyle: labelLarge.copyWith(color: cs.onSurfaceVariant),
+        secondaryLabelStyle:
+            labelLarge.copyWith(color: cs.onSecondaryContainer),
+        iconTheme: IconThemeData(color: cs.primary, size: 18),
+        shape: const RoundedRectangleBorder(borderRadius: KuberShape.smallR),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+        elevation: 0,
+        pressElevation: 0,
+        surfaceTintColor: Colors.transparent,
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: cs.surfaceContainerLow,
+        modalBackgroundColor: cs.surfaceContainerLow,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        modalElevation: 0,
+        modalBarrierColor: cs.scrim.withValues(alpha: 0.32),
+        shape: const RoundedRectangleBorder(borderRadius: KuberShape.sheetR),
+        showDragHandle: false,
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: GoTourLightColors.surfaceCard,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-          side: const BorderSide(color: GoTourLightColors.border),
+        backgroundColor: cs.surfaceContainerHigh,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        barrierColor: cs.scrim.withValues(alpha: 0.32),
+        shape: const RoundedRectangleBorder(
+          borderRadius:
+              BorderRadius.all(Radius.circular(KuberShape.extraLarge)),
         ),
+        titleTextStyle: text.headlineSmall!.copyWith(color: cs.onSurface),
+        contentTextStyle:
+            text.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: GoTourLightColors.accent,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-          ),
+          shape: stadium,
+          minimumSize: const Size(64, 40),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          textStyle: labelLarge,
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          backgroundColor: cs.secondaryContainer,
+          foregroundColor: cs.onSecondaryContainer,
+          shape: stadium,
+          minimumSize: const Size(64, 40),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          textStyle: labelLarge,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: GoTourLightColors.textPrimary,
-          side: const BorderSide(color: GoTourLightColors.border),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-          ),
+          foregroundColor: cs.onSurface,
+          side: BorderSide(color: cs.outlineVariant),
+          shape: stadium,
+          minimumSize: const Size(64, 40),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          textStyle: labelLarge,
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: GoTourLightColors.accent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(KuberRadius.md),
-          ),
+          foregroundColor: cs.primary,
+          shape: stadium,
+          minimumSize: const Size(48, 40),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          textStyle: labelLarge,
         ),
       ),
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: GoTourLightColors.accent,
-        linearTrackColor: GoTourLightColors.surfaceMuted,
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(shape: const CircleBorder()),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: cs.primaryContainer,
+        foregroundColor: cs.onPrimaryContainer,
+        elevation: 0,
+        focusElevation: 0,
+        hoverElevation: 0,
+        highlightElevation: 0,
+        shape: const CircleBorder(),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbIcon: WidgetStateProperty.resolveWith((s) =>
+            s.contains(WidgetState.selected)
+                ? Icon(Icons.check_rounded, size: 16, color: cs.primary)
+                : null),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: cs.primary,
+        linearTrackColor: cs.secondaryContainer,
+        circularTrackColor: Colors.transparent,
+        // ignore: deprecated_member_use
+        year2023: false,
+      ),
+      sliderTheme: SliderThemeData(
+        activeTrackColor: cs.primary,
+        inactiveTrackColor: cs.secondaryContainer,
+        thumbColor: cs.primary,
+        // ignore: deprecated_member_use
+        year2023: false,
+      ),
+      listTileTheme: ListTileThemeData(
+        iconColor: cs.onSurfaceVariant,
+        minVerticalPadding: KuberSpace.listRowPadV,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: KuberSpace.listRowPadH),
+        horizontalTitleGap: 16,
+        titleTextStyle: text.titleMedium!.copyWith(color: cs.onSurface),
+        subtitleTextStyle:
+            text.bodyMedium!.copyWith(color: cs.onSurfaceVariant),
+        shape: const RoundedRectangleBorder(borderRadius: KuberShape.mediumR),
       ),
       popupMenuTheme: PopupMenuThemeData(
-        color: GoTourLightColors.surfaceMuted,
+        color: cs.surfaceContainer,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        menuPadding: const EdgeInsets.all(KuberSpace.sm),
+        textStyle: labelLarge.copyWith(color: cs.onSurface),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(KuberRadius.md),
+          borderRadius: KuberShape.cardR,
+          side: BorderSide(color: cs.outlineVariant),
         ),
+      ),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: cs.inverseSurface,
+          borderRadius: const BorderRadius.all(
+              Radius.circular(KuberShape.extraSmall)),
+        ),
+        textStyle: text.bodySmall!.copyWith(color: cs.onInverseSurface),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       ),
     );
   }

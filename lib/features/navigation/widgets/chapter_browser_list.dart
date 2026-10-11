@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/tour_models.dart';
 import '../../../providers/lesson_position_provider.dart';
 import '../../../providers/progress_provider.dart';
+import '../../../shared/widgets/kuber_list.dart';
+import '../../../shared/widgets/kuber_progress.dart';
 
 /// Renders the chapter list with expandable lessons. Used both by the
 /// home screen progress section and the chapter navigation bottom sheet.
@@ -161,243 +162,200 @@ class ChapterNavRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     ref.watch(progressNotifierProvider);
     final notifier = ref.read(progressNotifierProvider.notifier);
     final total = chapter.pages.length;
     final pct = notifier.chapterProgress(chapterKey, total);
     final done = pct >= 1.0;
-    const size = 26.0;
 
-    return Container(
-      decoration: showDivider
-          ? BoxDecoration(
-              border: Border(bottom: BorderSide(color: cs.outline)))
-          : null,
-      child: Column(
-        children: [
-          GestureDetector(
-            onTap: onToggle,
-            behavior: HitTestBehavior.opaque,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  vertical: 12, horizontal: 12),
-              child: Row(
+    // Grouped-list row (Kuber cards-lists.md): 72 min, 16 / 8 padding, a 40
+    // tile, titleMedium + bodyMedium, ring and chevron trailing.
+    final header = InkWell(
+      onTap: onToggle,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: KuberSpace.listItem2),
+        padding: const EdgeInsets.symmetric(
+          horizontal: KuberSpace.listRowPadH,
+          vertical: KuberSpace.listRowPadV,
+        ),
+        child: Row(
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: done ? cs.primary : cs.secondaryContainer,
+                borderRadius: KuberShape.mediumR,
+              ),
+              child: done
+                  ? Icon(Icons.check_rounded, size: 20, color: cs.onPrimary)
+                  : Text(
+                      '$chapterNum',
+                      style: theme.textTheme.labelLarge!
+                          .copyWith(color: cs.onSecondaryContainer),
+                    ),
+            ),
+            const SizedBox(width: KuberSpace.lg),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      color: done ? cs.primary : cs.surfaceContainerHigh,
-                      borderRadius:
-                          BorderRadius.circular(KuberRadius.sm + 2),
-                      border: Border.all(
-                          color: done ? cs.primary : cs.outline),
-                    ),
-                    child: Center(
-                      child: done
-                          ? const Icon(Icons.check_rounded,
-                              size: 16, color: Colors.white)
-                          : Text(
-                              '$chapterNum',
-                              style: GoogleFonts.jetBrainsMono(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: cs.primary,
-                              ),
-                            ),
-                    ),
+                  Text(
+                    kChapterDisplayNames[chapterKey] ?? chapter.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleMedium,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          kChapterDisplayNames[chapterKey] ?? chapter.title,
-                          style: GoogleFonts.inter(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: cs.onSurface,
-                            letterSpacing: -0.2,
-                          ),
-                        ),
-                        Text(
-                          '$total lesson${total == 1 ? '' : 's'}',
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 11.5,
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    width: size,
-                    height: size,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        CustomPaint(
-                          size: const Size(size, size),
-                          painter: _RingPainter(
-                            progress: pct,
-                            color: cs.primary,
-                            trackColor: cs.outline,
-                          ),
-                        ),
-                        Text(
-                          done ? '✓' : '${(pct * 100).round()}',
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 8,
-                            fontWeight: FontWeight.w700,
-                            color:
-                                done ? cs.primary : cs.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    isExpanded
-                        ? Icons.expand_less_rounded
-                        : Icons.expand_more_rounded,
-                    size: 18,
-                    color: cs.onSurfaceVariant,
+                  Text(
+                    '$total lesson${total == 1 ? '' : 's'}',
+                    style: theme.textTheme.bodyMedium!
+                        .copyWith(color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
             ),
-          ),
-          if (isExpanded) ...[
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8, left: 18),
-              child: Column(
-                children: List.generate(chapter.pages.length, (i) {
-                  final lesson = chapter.pages[i];
-                  final isCurrent =
-                      currentPosition.chapterKey == chapterKey &&
-                          currentPosition.lessonIndex == i;
-                  final isDone = notifier.isComplete(chapterKey, i);
-                  return GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => onLessonTap(i),
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 2),
-                      padding:
-                          const EdgeInsets.fromLTRB(28, 8, 10, 8),
-                      decoration: BoxDecoration(
-                        color: isCurrent
-                            ? cs.primary.withValues(alpha: 0.08)
-                            : Colors.transparent,
-                        borderRadius:
-                            BorderRadius.circular(KuberRadius.sm + 2),
-                        border: Border(
-                          left: BorderSide(
-                            color: isCurrent
-                                ? cs.primary
-                                : Colors.transparent,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: isDone
-                                  ? cs.primary
-                                  : Colors.transparent,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: isDone
-                                    ? cs.primary
-                                    : cs.onSurfaceVariant,
-                                width: 1.5,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              lesson.title,
-                              style: GoogleFonts.inter(
-                                fontSize: 13.5,
-                                color: isCurrent
-                                    ? cs.primary
-                                    : cs.onSurface,
-                                fontWeight: isCurrent
-                                    ? FontWeight.w600
-                                    : FontWeight.w400,
-                                letterSpacing: -0.1,
-                              ),
-                            ),
-                          ),
-                          if (isCurrent)
-                            Text(
-                              "You're here",
-                              style: GoogleFonts.inter(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: cs.primary,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                        ],
+            const SizedBox(width: KuberSpace.md),
+            KuberRingProgress(
+              value: pct,
+              size: 32,
+              stroke: 3,
+              child: done
+                  ? null
+                  : Text(
+                      '${(pct * 100).round()}',
+                      style: theme.textTheme.labelSmall!.copyWith(
+                        fontSize: 9,
+                        color: cs.onSurfaceVariant,
                       ),
                     ),
-                  );
-                }),
-              ),
+            ),
+            const SizedBox(width: KuberSpace.sm),
+            AnimatedRotation(
+              turns: isExpanded ? 0.5 : 0,
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              child: Icon(Icons.expand_more_rounded,
+                  size: 20, color: cs.onSurfaceVariant),
             ),
           ],
+        ),
+      ),
+    );
+
+    return Container(
+      decoration: showDivider
+          ? BoxDecoration(
+              border: Border(bottom: BorderSide(color: cs.outlineVariant)))
+          : null,
+      child: Column(
+        children: [
+          header,
+          AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: !isExpanded
+                ? const SizedBox(width: double.infinity)
+                : Padding(
+                    padding: const EdgeInsets.only(bottom: KuberSpace.sm),
+                    child: Column(
+                      children: List.generate(chapter.pages.length, (i) {
+                        final isCurrent =
+                            currentPosition.chapterKey == chapterKey &&
+                                currentPosition.lessonIndex == i;
+                        return _LessonRow(
+                          title: chapter.pages[i].title,
+                          isCurrent: isCurrent,
+                          isDone: notifier.isComplete(chapterKey, i),
+                          onTap: () => onLessonTap(i),
+                        );
+                      }),
+                    ),
+                  ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _RingPainter extends CustomPainter {
-  final double progress;
-  final Color color;
-  final Color trackColor;
+/// A lesson under an expanded chapter, aligned with the chapter title. The
+/// current one sits on secondaryContainer with a "You're here" pill.
+class _LessonRow extends StatelessWidget {
+  final String title;
+  final bool isCurrent;
+  final bool isDone;
+  final VoidCallback onTap;
 
-  const _RingPainter({
-    required this.progress,
-    required this.color,
-    required this.trackColor,
+  const _LessonRow({
+    required this.title,
+    required this.isCurrent,
+    required this.isDone,
+    required this.onTap,
   });
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 2.5;
-    const startAngle = -3.14159 / 2;
-
-    final trackPaint = Paint()
-      ..color = trackColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5;
-    canvas.drawCircle(center, radius, trackPaint);
-
-    final progressPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5
-      ..strokeCap = StrokeCap.round;
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      startAngle,
-      progress * 2 * 3.14159,
-      false,
-      progressPaint,
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final fg = isCurrent ? cs.onSecondaryContainer : cs.onSurface;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: KuberSpace.sm),
+      child: Material(
+        color: isCurrent ? cs.secondaryContainer : Colors.transparent,
+        borderRadius: KuberShape.mediumR,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: KuberShape.mediumR,
+          child: Container(
+            constraints: const BoxConstraints(minHeight: KuberSpace.tapTarget),
+            // 8 + 8 puts the dot column under the chapter tile, and the 16
+            // gap puts the title under the chapter title.
+            padding: const EdgeInsets.symmetric(horizontal: KuberSpace.sm),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 40,
+                  child: Center(
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: isDone ? cs.primary : Colors.transparent,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isDone ? cs.primary : cs.outline,
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: KuberSpace.lg),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: (isCurrent
+                            ? theme.textTheme.titleSmall
+                            : theme.textTheme.bodyMedium)!
+                        .copyWith(color: fg),
+                  ),
+                ),
+                if (isCurrent) ...[
+                  const SizedBox(width: KuberSpace.sm),
+                  const KuberPill(label: "You're here", tone: KuberTone.primary),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
-
-  @override
-  bool shouldRepaint(covariant _RingPainter old) =>
-      old.progress != progress;
 }

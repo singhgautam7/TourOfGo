@@ -19,13 +19,14 @@ class OnboardingDotsIndicator extends StatelessWidget {
       children: List.generate(pageCount, (i) {
         final active = i == currentPage;
         return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
           margin: const EdgeInsets.symmetric(horizontal: 3),
           width: active ? 24 : 8,
           height: 8,
           decoration: BoxDecoration(
-            color: active ? cs.primary : cs.outline,
-            borderRadius: BorderRadius.circular(KuberRadius.full),
+            color: active ? cs.primary : cs.outlineVariant,
+            borderRadius: BorderRadius.circular(KuberShape.full),
           ),
         );
       }),

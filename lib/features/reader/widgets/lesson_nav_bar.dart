@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_button.dart';
 
 class LessonNavBar extends StatelessWidget {
   final VoidCallback onPrev;
@@ -20,46 +20,39 @@ class LessonNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(
-          KuberSpacing.lg, KuberSpacing.sm, KuberSpacing.lg, KuberSpacing.md),
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        border: Border(top: BorderSide(color: cs.outline)),
+        color: cs.surface,
+        border: Border(top: BorderSide(color: cs.outlineVariant)),
       ),
-      child: Row(
-        children: [
-          OutlinedButton.icon(
-            onPressed: currentIndex > 0 ? onPrev : null,
-            icon: const Icon(Icons.chevron_left_rounded, size: 18),
-            label: Text(
-              'Prev',
-              style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-            ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(KuberSpace.screenMargin,
+              KuberSpace.md, KuberSpace.screenMargin, KuberSpace.md),
+          child: Row(
+            children: [
+              AppButton(
+                label: 'Prev',
+                icon: Icons.chevron_left_rounded,
+                type: AppButtonType.outline,
+                height: 40,
+                onPressed: currentIndex > 0 ? onPrev : null,
+              ),
+              const Spacer(),
+              _LessonDots(current: currentIndex, total: totalLessons, cs: cs),
+              const Spacer(),
+              AppButton(
+                label: currentIndex == totalLessons - 1 ? 'Done' : 'Next',
+                icon: Icons.chevron_right_rounded,
+                iconAfterLabel: true,
+                type: AppButtonType.primary,
+                height: 40,
+                onPressed: onNext,
+              ),
+            ],
           ),
-          const Spacer(),
-          _LessonDots(
-            current: currentIndex,
-            total: totalLessons,
-            cs: cs,
-          ),
-          const Spacer(),
-          FilledButton.icon(
-            onPressed: onNext,
-            icon: const SizedBox.shrink(),
-            label: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  currentIndex == totalLessons - 1 ? 'Done' : 'Next',
-                  style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(width: 4),
-                const Icon(Icons.chevron_right_rounded, size: 18),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -88,19 +81,17 @@ class _LessonDots extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(KuberRadius.full),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.fullR,
       ),
       child: Text(
         '${current + 1} / $total',
-        style: GoogleFonts.jetBrainsMono(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: cs.onSurfaceVariant,
-        ),
+        style: Theme.of(context)
+            .textTheme
+            .labelMedium!
+            .copyWith(color: cs.onSurfaceVariant),
       ),
     );
   }
@@ -108,13 +99,14 @@ class _LessonDots extends StatelessWidget {
   Widget _dot(int idx, int current, ColorScheme cs) {
     final active = idx == current;
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
       margin: const EdgeInsets.symmetric(horizontal: 2),
       width: active ? 16 : 6,
       height: 6,
       decoration: BoxDecoration(
-        color: active ? cs.primary : cs.outline,
-        borderRadius: BorderRadius.circular(KuberRadius.full),
+        color: active ? cs.primary : cs.outlineVariant,
+        borderRadius: BorderRadius.circular(KuberShape.full),
       ),
     );
   }

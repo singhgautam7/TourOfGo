@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:tourgo/core/utils/locale_font.dart';
 import '../../../core/models/tour_models.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/compile_service.dart';
-import '../../../shared/widgets/tourgo_app_bar.dart';
+import '../../../shared/widgets/app_icon_button.dart';
+import '../../../shared/widgets/kuber_app_bar.dart';
+import '../../../shared/widgets/kuber_list.dart';
 import '../../reader/widgets/code_card_chrome.dart';
 import '../../reader/widgets/go_code_controller.dart';
 import '../../reader/widgets/line_numbered_code.dart';
@@ -94,54 +96,30 @@ class _SandboxScreenState extends ConsumerState<SandboxScreen> {
 
     return Scaffold(
       backgroundColor: cs.surface,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: TourGoAppBar(
-                showBack: true,
-                title: widget.title ?? 'Sandbox',
-                actions: [
-                  GestureDetector(
-                    onTap: _reset,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 9, vertical: 7),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHigh,
-                        borderRadius:
-                            BorderRadius.circular(KuberRadius.md),
-                        border: Border.all(
-                            color: cs.outline.withValues(alpha: 0.25)),
-                      ),
-                      child: Icon(Icons.refresh_rounded,
-                          size: 18, color: cs.onSurfaceVariant),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(
-                    KuberSpacing.lg,
-                    KuberSpacing.md,
-                    KuberSpacing.lg,
-                    KuberSpacing.xxl),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _EditorCard(controller: _controller),
-                    const SizedBox(height: KuberSpacing.md),
-                    RunButton(isRunning: _running, onTap: _run),
-                    if (_response != null) OutputPanel(response: _response!),
-                  ],
-                ),
-              ),
+      body: KuberScrollAwayHeader(
+        header: KuberAppBar(
+          showBack: true,
+          title: widget.title ?? 'Sandbox',
+          actions: [
+            AppIconButton(
+              icon: Icons.refresh_rounded,
+              semanticLabel: 'Reset',
+              onPressed: _reset,
             ),
           ],
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(KuberSpace.screenMargin,
+              KuberSpace.sm, KuberSpace.screenMargin, KuberSpace.xxl),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _EditorCard(controller: _controller),
+              const SizedBox(height: KuberSpace.md),
+              RunButton(isRunning: _running, onTap: _run),
+              if (_response != null) OutputPanel(response: _response!),
+            ],
+          ),
         ),
       ),
     );
@@ -157,7 +135,7 @@ class _EditorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    final codeStyle = GoogleFonts.jetBrainsMono(
+    final codeStyle = monoFont(
       fontSize: 13,
       height: 1.6,
       color: cs.onSurface,
@@ -171,7 +149,7 @@ class _EditorCard extends StatelessWidget {
       filename: 'main.go',
       trailing: const _EditableBadge(),
       body: Padding(
-        padding: const EdgeInsets.only(bottom: KuberSpacing.md),
+        padding: const EdgeInsets.only(bottom: KuberSpace.md),
         child: ValueListenableBuilder<TextEditingValue>(
           valueListenable: controller,
           builder: (context, value, _) {
@@ -215,16 +193,6 @@ class _EditableBadge extends StatelessWidget {
   const _EditableBadge();
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Text(
-      'EDITABLE',
-      style: GoogleFonts.inter(
-        fontSize: 10,
-        fontWeight: FontWeight.w700,
-        color: cs.primary,
-        letterSpacing: 1.2,
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      const KuberPill(label: 'Editable', tone: KuberTone.primary);
 }

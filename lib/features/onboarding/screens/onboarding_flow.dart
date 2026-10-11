@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/utils/go_tour_prefs.dart';
 import '../../../providers/tour_content_provider.dart';
-import '../../../shared/widgets/go_tour_loader.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_loader.dart';
+import '../widgets/onboarding_dots_indicator.dart';
 import '../pages/onboarding_page_1.dart';
 import '../pages/onboarding_page_2.dart';
 
@@ -17,6 +20,7 @@ class OnboardingFlow extends ConsumerStatefulWidget {
 
 class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   final _pageController = PageController();
+  int _page = 0;
 
   @override
   void dispose() {
@@ -28,7 +32,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     _pageController.animateToPage(
       page,
       duration: const Duration(milliseconds: 320),
-      curve: Curves.easeInOut,
+      curve: Curves.easeOutCubic,
     );
   }
 
@@ -38,7 +42,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     await prefs.setBool(GoTourPrefs.onboarded, true);
 
     if (!mounted) return;
-    await GoTourLoader.show<void>(
+    await KuberLoader.show<void>(
       context,
       label: 'Fetching content…',
       future: ref
@@ -53,18 +57,69 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
 
   @override
   Widget build(BuildContext context) {
+    final last = _page == 1;
+    // Only the pages swipe; the dots and the buttons are one fixed footer,
+    // as in Perch's and Kuber's welcome.
     return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        physics: const ClampingScrollPhysics(),
-        onPageChanged: (_) {},
-        children: [
-          OnboardingPage1(
-            onNext: () => _goToPage(1),
-            onSkip: _startLearning,
-          ),
-          OnboardingPage2(onStart: _startLearning),
-        ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                physics: const ClampingScrollPhysics(),
+                onPageChanged: (p) => setState(() => _page = p),
+                children: const [OnboardingPage1(), OnboardingPage2()],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                KuberSpace.screenMargin,
+                KuberSpace.lg,
+                KuberSpace.screenMargin,
+                KuberSpace.xl,
+              ),
+              child: Column(
+                children: [
+                  OnboardingDotsIndicator(pageCount: 2, currentPage: _page),
+                  const SizedBox(height: KuberSpace.lg),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: AppButton(
+                          label: last ? 'Start learning' : 'Get started',
+                          icon: Icons.arrow_forward_rounded,
+                          iconAfterLabel: true,
+                          type: AppButtonType.primary,
+                          fullWidth: true,
+                          onPressed: last ? _startLearning : () => _goToPage(1),
+                        ),
+                      ),
+                      // Skip beside the main action (Perch's welcome); the
+                      // last page has nothing left to skip.
+                      AnimatedSize(
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeOutCubic,
+                        child: last
+                            ? const SizedBox.shrink()
+                            : Padding(
+                                padding: const EdgeInsets.only(
+                                  left: KuberSpace.md,
+                                ),
+                                child: AppButton(
+                                  label: 'Skip',
+                                  type: AppButtonType.outline,
+                                  onPressed: _startLearning,
+                                ),
+                              ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

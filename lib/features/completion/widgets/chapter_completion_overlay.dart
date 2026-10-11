@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:tourgo/core/utils/locale_font.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../shared/widgets/go_tour_button.dart';
+import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_list.dart';
 
 class ChapterCompletionOverlay extends StatefulWidget {
   final String chapterName;
@@ -53,7 +54,7 @@ class _ChapterCompletionOverlayState extends State<ChapterCompletionOverlay>
     _circleAnim = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _ctrl,
-        curve: const Interval(0.0, 0.33, curve: Curves.elasticOut),
+        curve: const Interval(0.0, 0.33, curve: Curves.easeOutBack),
       ),
     );
     _checkAnim = Tween<double>(begin: 0, end: 1).animate(
@@ -80,7 +81,8 @@ class _ChapterCompletionOverlayState extends State<ChapterCompletionOverlay>
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return AnimatedBuilder(
       animation: _ctrl,
@@ -119,86 +121,64 @@ class _ChapterCompletionOverlayState extends State<ChapterCompletionOverlay>
                               const SizedBox(height: 28),
                               Text(
                                 'Chapter complete!',
-                                style: GoogleFonts.inter(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w800,
-                                  color: cs.onSurface,
-                                  letterSpacing: -0.7,
-                                ),
+                                style: theme.textTheme.headlineMedium,
                                 textAlign: TextAlign.center,
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: KuberSpace.sm),
                               Text(
                                 'Chapter: ${widget.chapterName}',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14,
-                                  color: cs.onSurfaceVariant,
-                                  letterSpacing: -0.2,
+                                style: theme.textTheme.bodyMedium!
+                                    .copyWith(color: cs.onSurfaceVariant),
+                              ),
+                              const SizedBox(height: KuberSpace.xl),
+                              // Stat card (Kuber stat-cards.md): caps label,
+                              // value, caption, in two columns.
+                              KuberCard(
+                                child: IntrinsicHeight(
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: _Stat(
+                                          label: 'Lessons',
+                                          value: '${widget.lessonsCompleted}',
+                                          sub: 'completed',
+                                        ),
+                                      ),
+                                      VerticalDivider(
+                                          width: KuberSpace.xl,
+                                          color: cs.outlineVariant),
+                                      Expanded(
+                                        child: _Stat(
+                                          label: 'Tour',
+                                          value:
+                                              '${(widget.overallProgress * 100).round()}%',
+                                          sub: 'of total',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-
-                              // Stats card
-                              const SizedBox(height: 22),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 18, vertical: 14),
-                                decoration: BoxDecoration(
-                                  color: cs.surfaceContainer,
-                                  borderRadius: BorderRadius.circular(KuberRadius.md),
-                                  border: Border.all(color: cs.outline),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    _Stat(
-                                      label: 'LESSONS',
-                                      value: '${widget.lessonsCompleted}',
-                                      sub: 'completed',
-                                      cs: cs,
-                                    ),
-                                    const SizedBox(width: 18),
-                                    Container(
-                                        width: 1,
-                                        height: 36,
-                                        color: cs.outline),
-                                    const SizedBox(width: 18),
-                                    _Stat(
-                                      label: 'TOUR',
-                                      value:
-                                          '${(widget.overallProgress * 100).round()}%',
-                                      sub: 'of total',
-                                      cs: cs,
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              const SizedBox(height: 28),
-                              GoTourButton(
+                              const SizedBox(height: KuberSpace.xl),
+                              AppButton(
                                 label: 'Next chapter',
                                 icon: Icons.arrow_forward_rounded,
                                 iconAfterLabel: true,
-                                type: GoTourButtonType.primary,
+                                type: AppButtonType.primary,
                                 fullWidth: true,
                                 onPressed: widget.onNextChapter,
                               ),
-                              const SizedBox(height: 10),
-                              GoTourButton(
+                              const SizedBox(height: KuberSpace.md),
+                              AppButton(
                                 label: 'Browse chapters',
-                                type: GoTourButtonType.outline,
+                                type: AppButtonType.outline,
                                 fullWidth: true,
                                 onPressed: widget.onBrowse,
                               ),
-                              const SizedBox(height: 14),
+                              const SizedBox(height: KuberSpace.sm),
                               TextButton(
                                 onPressed: widget.onDismiss,
-                                child: Text(
-                                  'Stay here',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 13,
-                                    color: cs.onSurfaceVariant,
-                                  ),
-                                ),
+                                child: const Text('Stay here'),
                               ),
                             ],
                           ),
@@ -237,6 +217,8 @@ class _SuccessMark extends StatelessWidget {
           circleProgress: circleProgress,
           checkProgress: checkProgress,
           color: cs.primary,
+          ring: cs.primaryContainer,
+          check: cs.onPrimary,
         ),
       ),
     );
@@ -247,11 +229,15 @@ class _CheckmarkPainter extends CustomPainter {
   final double circleProgress;
   final double checkProgress;
   final Color color;
+  final Color ring;
+  final Color check;
 
   const _CheckmarkPainter({
     required this.circleProgress,
     required this.checkProgress,
     required this.color,
+    required this.ring,
+    required this.check,
   });
 
   @override
@@ -264,7 +250,7 @@ class _CheckmarkPainter extends CustomPainter {
       center,
       radius * circleProgress * 1.2,
       Paint()
-        ..color = color.withValues(alpha: 0.12)
+        ..color = ring
         ..style = PaintingStyle.fill,
     );
 
@@ -288,7 +274,7 @@ class _CheckmarkPainter extends CustomPainter {
       canvas.drawPath(
         metric.extractPath(0, metric.length * checkProgress),
         Paint()
-          ..color = Colors.white
+          ..color = check
           ..strokeWidth = 3
           ..strokeCap = StrokeCap.round
           ..style = PaintingStyle.stroke,
@@ -305,46 +291,21 @@ class _Stat extends StatelessWidget {
   final String label;
   final String value;
   final String sub;
-  final ColorScheme cs;
 
-  const _Stat({
-    required this.label,
-    required this.value,
-    required this.sub,
-    required this.cs,
-  });
+  const _Stat({required this.label, required this.value, required this.sub});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            color: cs.onSurfaceVariant,
-            letterSpacing: 1.2,
-          ),
-        ),
-        Text(
-          value,
-          style: GoogleFonts.jetBrainsMono(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            color: cs.primary,
-            letterSpacing: -0.5,
-            height: 1.2,
-          ),
-        ),
-        Text(
-          sub,
-          style: GoogleFonts.inter(
-            fontSize: 11,
-            color: cs.onSurfaceVariant,
-          ),
-        ),
+        Text(label.toUpperCase(), style: sectionHeaderStyle(context)),
+        const SizedBox(height: KuberSpace.xs),
+        Text(value,
+            style: theme.textTheme.headlineSmall!
+                .copyWith(color: theme.colorScheme.primary)),
+        Text(sub, style: theme.textTheme.bodySmall),
       ],
     );
   }

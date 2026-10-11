@@ -1,11 +1,11 @@
 // Polished editorial sections for the About screen.
 //
-// Visual language inherited from Kuber (Inter + Playfair italics,
-// primary-tint eyebrow, no shadows, borders for depth, KuberRadius.*).
+// Visual language from Kuber's M3 About (Inter + Instrument Serif italics,
+// primary-tint eyebrow, no shadows, outlineVariant borders, radius 20).
 // Content adapted for "A Tour of Go".
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:tourgo/core/utils/locale_font.dart';
 
 import '../../../core/theme/app_theme.dart';
 
@@ -23,8 +23,8 @@ class AboutWhatIsTourOfGoSection extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.xl),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.cardR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -43,10 +43,10 @@ class AboutWhatIsTourOfGoSection extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: KuberSpacing.sm),
+                const SizedBox(width: KuberSpace.sm),
                 Text(
                   'WHAT IS TOUR OF GO',
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.6,
@@ -56,7 +56,7 @@ class AboutWhatIsTourOfGoSection extends StatelessWidget {
               ],
             ),
           ),
-          Container(height: 1, color: cs.outline),
+          Container(height: 1, color: cs.outlineVariant),
 
           // --- Body ---
           Padding(
@@ -67,9 +67,9 @@ class AboutWhatIsTourOfGoSection extends StatelessWidget {
                 // Display headline
                 Text.rich(
                   TextSpan(
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 22,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       height: 1.25,
                       letterSpacing: -0.4,
                       color: cs.onSurface,
@@ -78,7 +78,7 @@ class AboutWhatIsTourOfGoSection extends StatelessWidget {
                       const TextSpan(text: 'The best way to '),
                       TextSpan(
                         text: 'learn Go',
-                        style: GoogleFonts.playfairDisplay(
+                        style: serifFont(
                           fontSize: 24,
                           fontStyle: FontStyle.italic,
                           fontWeight: FontWeight.w700,
@@ -90,11 +90,11 @@ class AboutWhatIsTourOfGoSection extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.md),
                 Text(
                   "A mobile-first companion for the official Go tour and Go by Example. "
                   "Read lessons, run code, and track your progress. All in one place.",
-                  style: GoogleFonts.inter(
+                  style: localeFont(
                     fontSize: 13.5,
                     color: cs.onSurfaceVariant,
                     height: 1.6,
@@ -102,7 +102,7 @@ class AboutWhatIsTourOfGoSection extends StatelessWidget {
                 ),
 
                 // Tag rail
-                const SizedBox(height: KuberSpacing.md),
+                const SizedBox(height: KuberSpace.md),
                 Wrap(
                   spacing: 6,
                   runSpacing: 6,
@@ -135,8 +135,8 @@ class AboutGoPhilosophySection extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.xl),
-        border: Border.all(color: cs.outline),
+        borderRadius: KuberShape.cardR,
+        border: Border.all(color: cs.outlineVariant),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -152,7 +152,7 @@ class AboutGoPhilosophySection extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 2),
                   child: Text(
                     'Go',
-                    style: GoogleFonts.playfairDisplay(
+                    style: serifFont(
                       fontSize: 26,
                       fontStyle: FontStyle.italic,
                       fontWeight: FontWeight.w700,
@@ -165,7 +165,7 @@ class AboutGoPhilosophySection extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'THE GO PHILOSOPHY',
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1.6,
@@ -181,12 +181,11 @@ class AboutGoPhilosophySection extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: cs.surfaceContainerHigh,
-                    border: Border.all(color: cs.outline),
-                    borderRadius: BorderRadius.circular(KuberRadius.sm),
+                    borderRadius: KuberShape.smallR,
                   ),
                   child: Text(
                     'GOLANG',
-                    style: GoogleFonts.jetBrainsMono(
+                    style: monoFont(
                       fontSize: 9.5,
                       fontWeight: FontWeight.w600,
                       color: cs.onSurfaceVariant,
@@ -197,14 +196,14 @@ class AboutGoPhilosophySection extends StatelessWidget {
               ],
             ),
           ),
-          Container(height: 1, color: cs.outline),
+          Container(height: 1, color: cs.outlineVariant),
 
           // --- Verses ---
           _PhilosophyVerse(
             numeral: 'I',
             child: Text.rich(
               TextSpan(
-                style: GoogleFonts.inter(
+                style: localeFont(
                   fontSize: 13.5,
                   height: 1.55,
                   color: cs.onSurface,
@@ -212,7 +211,7 @@ class AboutGoPhilosophySection extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: 'Go',
-                    style: GoogleFonts.inter(
+                    style: localeFont(
                       fontSize: 13.5,
                       fontWeight: FontWeight.w700,
                       color: cs.onSurface,
@@ -226,26 +225,26 @@ class AboutGoPhilosophySection extends StatelessWidget {
               ),
             ),
           ),
-          Container(height: 1, color: cs.outline),
+          Container(height: 1, color: cs.outlineVariant),
           _PhilosophyVerse(
             numeral: 'II',
             child: Text(
               'Its design favors clarity over cleverness, and simplicity '
               'over abstraction. The language is small by intention.',
-              style: GoogleFonts.inter(
+              style: localeFont(
                 fontSize: 13.5,
                 height: 1.55,
                 color: cs.onSurface,
               ),
             ),
           ),
-          Container(height: 1, color: cs.outline),
+          Container(height: 1, color: cs.outlineVariant),
           _PhilosophyVerse(
             numeral: 'III',
             child: Text(
               "Don't communicate by sharing memory.\n"
               "Share memory by communicating.",
-              style: GoogleFonts.playfairDisplay(
+              style: serifFont(
                 fontSize: 16,
                 fontStyle: FontStyle.italic,
                 fontWeight: FontWeight.w700,
@@ -280,7 +279,7 @@ class _PhilosophyVerse extends StatelessWidget {
               alignment: Alignment.topLeft,
               child: Text(
                 numeral,
-                style: GoogleFonts.playfairDisplay(
+                style: serifFont(
                   fontSize: 28,
                   fontStyle: FontStyle.italic,
                   fontWeight: FontWeight.w700,
@@ -308,16 +307,15 @@ class _AboutTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        border: Border.all(color: cs.outline),
-        borderRadius: BorderRadius.circular(KuberRadius.full),
+        color: cs.secondaryContainer,
+        borderRadius: KuberShape.fullR,
       ),
       child: Text(
         label,
-        style: GoogleFonts.inter(
-          fontSize: 10.5,
+        style: localeFont(
+          fontSize: 11,
           fontWeight: FontWeight.w600,
-          color: cs.onSurfaceVariant,
+          color: cs.onSecondaryContainer,
           letterSpacing: 0.3,
         ),
       ),

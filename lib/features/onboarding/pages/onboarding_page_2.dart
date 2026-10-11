@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:tourgo/core/utils/locale_font.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../shared/widgets/go_tour_button.dart';
-import '../widgets/onboarding_dots_indicator.dart';
+import '../../../shared/widgets/kuber_list.dart';
 
+/// Welcome, page 2: where the content comes from and what the app does. The
+/// dots and buttons live in [OnboardingFlow]'s fixed footer.
 class OnboardingPage2 extends StatelessWidget {
-  final VoidCallback onStart;
-
-  const OnboardingPage2({super.key, required this.onStart});
+  const OnboardingPage2({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,201 +14,92 @@ class OnboardingPage2 extends StatelessWidget {
 
     const features = [
       (
-        icon: Icons.offline_bolt_rounded,
+        icon: Icons.offline_bolt_outlined,
         title: 'Works offline',
-        body: 'Downloaded once, available forever. No internet needed after first load.',
+        body:
+            'Downloaded once, available forever. No internet needed after first load.',
         accent: true,
       ),
       (
         icon: Icons.code_rounded,
         title: 'Run Go code',
-        body: 'Every example is runnable. Output shown inline — powered by the official Go Playground.',
+        body:
+            'Every example is runnable. Output shown inline, powered by the official Go Playground.',
         accent: false,
       ),
       (
-        icon: Icons.speed_rounded,
+        icon: Icons.speed_outlined,
         title: 'Learn your way',
-        body: 'Jump to any chapter. Pick up where you left off. Your progress is saved locally.',
+        body:
+            'Jump to any chapter. Pick up where you left off. Your progress is saved locally.',
         accent: false,
       ),
     ];
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(28, 8, 28, 34),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 48,
-              child: Row(
-                children: [
-                  _GoMark(cs: cs),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Tour of Go',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: cs.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    final theme = Theme.of(context);
 
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Straight from\nthe source.',
-                    style: GoogleFonts.inter(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: cs.onSurface,
-                      height: 1.08,
-                      letterSpacing: -0.9,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  RichText(
-                    text: TextSpan(
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: cs.onSurfaceVariant,
-                        height: 1.5,
-                      ),
-                      children: [
-                        const TextSpan(
-                            text: 'All content is fetched directly from '),
-                        TextSpan(
-                          text: 'go.dev',
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 13,
-                            color: cs.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const TextSpan(
-                            text:
-                                ' — the official Go documentation, not a copy.'),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 26),
-                  ...features.map((f) => _FeatureCard(feature: f, cs: cs)),
-                ],
-              ),
-            ),
-
-            Column(
-              children: [
-                OnboardingDotsIndicator(pageCount: 2, currentPage: 1),
-                const SizedBox(height: 18),
-                GoTourButton(
-                  label: 'Start learning',
-                  icon: Icons.arrow_forward_rounded,
-                  iconAfterLabel: true,
-                  type: GoTourButtonType.primary,
-                  fullWidth: true,
-                  onPressed: onStart,
-                ),
-              ],
-            ),
-          ],
+    // Centred when it fits, scrollable when the text is large.
+    return LayoutBuilder(
+      builder: (context, box) => SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: KuberSpace.screenMargin,
         ),
-      ),
-    );
-  }
-}
-
-class _FeatureCard extends StatelessWidget {
-  final ({IconData icon, String title, String body, bool accent}) feature;
-  final ColorScheme cs;
-  const _FeatureCard({required this.feature, required this.cs});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainer,
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(
-          color: feature.accent
-              ? cs.primary.withValues(alpha: 0.45)
-              : cs.outline,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: feature.accent
-                  ? cs.primary.withValues(alpha: 0.12)
-                  : cs.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(KuberRadius.md),
-              border: Border.all(color: cs.outline),
-            ),
-            child: Icon(
-              feature.icon,
-              size: 20,
-              color: feature.accent ? cs.primary : cs.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  feature.title,
-                  style: GoogleFonts.inter(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: cs.onSurface,
-                    letterSpacing: -0.2,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  feature.body,
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: box.maxHeight),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Straight from\nthe source.',
+                style: theme.textTheme.headlineLarge,
+              ),
+              const SizedBox(height: KuberSpace.md),
+              Text.rich(
+                TextSpan(
+                  style: theme.textTheme.bodyLarge!.copyWith(
                     color: cs.onSurfaceVariant,
-                    height: 1.4,
                   ),
+                  children: [
+                    const TextSpan(
+                      text: 'All content is fetched directly from ',
+                    ),
+                    TextSpan(
+                      text: 'go.dev',
+                      style: monoFont(
+                        fontSize: 15,
+                        color: cs.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const TextSpan(
+                      text: ', the official Go documentation, not a copy.',
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: KuberSpace.xl),
+              // Grouped list (Kuber cards-lists.md): 40 tiles, the first in
+              // primaryContainer as the lead feature.
+              KuberGroup(
+                children: [
+                  for (final f in features)
+                    KuberListRow(
+                      leading: KuberIconTile(
+                        icon: f.icon,
+                        tone: f.accent
+                            ? KuberTone.primary
+                            : KuberTone.secondary,
+                      ),
+                      title: f.title,
+                      subtitle: f.body,
+                      subtitleLines: 3,
+                    ),
+                ],
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _GoMark extends StatelessWidget {
-  final ColorScheme cs;
-  const _GoMark({required this.cs});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 28,
-      height: 28,
-      decoration: BoxDecoration(
-        color: cs.primary.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(KuberRadius.md),
-        border: Border.all(color: cs.primary.withValues(alpha: 0.3)),
-      ),
-      child: Center(
-        child: Icon(Icons.circle_outlined, color: cs.primary, size: 16),
+        ),
       ),
     );
   }

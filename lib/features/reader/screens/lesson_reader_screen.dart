@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/tour_models.dart';
 import '../../../core/utils/html_parser.dart';
@@ -10,6 +9,9 @@ import '../../../providers/tour_content_provider.dart';
 import '../../../providers/lesson_position_provider.dart';
 import '../../../providers/progress_provider.dart';
 import '../../../providers/compile_provider.dart';
+import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/kuber_empty_state.dart';
+import '../../../shared/widgets/reader_header.dart';
 import '../widgets/lesson_content_view.dart';
 import '../widgets/code_inline_card.dart';
 import '../widgets/run_button.dart';
@@ -190,7 +192,11 @@ class _LessonReaderScreenState extends ConsumerState<LessonReaderScreen> {
       loading: () => const Scaffold(
           body: Center(child: CircularProgressIndicator())),
       error: (e, _) => Scaffold(
-        body: Center(child: Text('Error: $e')),
+        body: KuberEmptyState(
+          icon: Icons.error_outline_rounded,
+          title: 'Error',
+          description: '$e',
+        ),
       ),
       data: (content) {
         final chapter = content[_chapterKey];
@@ -220,7 +226,6 @@ class _LessonReaderScreenState extends ConsumerState<LessonReaderScreen> {
                 totalLessons: totalLessons,
                 lesson: currentLesson,
                 onBack: () => context.pop(),
-                cs: cs,
               ),
               Expanded(
                 child: PageView.builder(
@@ -263,18 +268,17 @@ class _EditInSandboxButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: () {
-          context.push(
-            '/sandbox',
-            extra: <String, String?>{'code': code, 'title': title},
-          );
-        },
-        icon: const Icon(Icons.edit_rounded, size: 18),
-        label: const Text('Edit in Sandbox'),
-      ),
+    return AppButton(
+      label: 'Edit in Sandbox',
+      icon: Icons.edit_outlined,
+      type: AppButtonType.outline,
+      fullWidth: true,
+      onPressed: () {
+        context.push(
+          '/sandbox',
+          extra: <String, String?>{'code': code, 'title': title},
+        );
+      },
     );
   }
 }
@@ -294,7 +298,7 @@ class _LessonPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
     final compileState =
         ref.watch(compileNotifierProvider(chapterKey, lessonIndex));
     final parsedBlocks = GoHtmlParser.parse(
@@ -306,32 +310,24 @@ class _LessonPage extends ConsumerWidget {
     return SingleChildScrollView(
       controller: scrollController,
       child: Padding(
-        padding: const EdgeInsets.all(KuberSpacing.lg),
+        padding: const EdgeInsets.fromLTRB(KuberSpace.screenMargin,
+            KuberSpace.lg, KuberSpace.screenMargin, KuberSpace.lg),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              lesson.title,
-              style: GoogleFonts.inter(
-                fontSize: 26,
-                fontWeight: FontWeight.w800,
-                color: cs.onSurface,
-                letterSpacing: -0.6,
-                height: 1.15,
-              ),
-            ),
-            const SizedBox(height: KuberSpacing.lg),
+            Text(lesson.title, style: theme.textTheme.headlineSmall),
+            const SizedBox(height: KuberSpace.lg),
             LessonContentView(blocks: parsedBlocks),
             if (lesson.files.isNotEmpty) ...[
-              const SizedBox(height: KuberSpacing.xl),
+              const SizedBox(height: KuberSpace.xl),
               CodeInlineCard(file: lesson.files.first),
-              const SizedBox(height: KuberSpacing.md),
+              const SizedBox(height: KuberSpace.md),
               if (_isPlayground(chapterKey, lesson)) ...[
                 _EditInSandboxButton(
                   code: lesson.files.first.content,
                   title: lesson.title,
                 ),
-                const SizedBox(height: KuberSpacing.sm),
+                const SizedBox(height: KuberSpace.sm),
               ],
               RunButton(
                 isRunning: compileState.isLoading,
@@ -346,7 +342,7 @@ class _LessonPage extends ConsumerWidget {
               if (compileState.hasValue && compileState.value != null)
                 OutputPanel(response: compileState.value!),
             ],
-            const SizedBox(height: KuberSpacing.xxl),
+            const SizedBox(height: KuberSpace.xxl),
           ],
         ),
       ),
@@ -361,7 +357,6 @@ class _ReaderTopBar extends StatelessWidget {
   final int totalLessons;
   final LessonData lesson;
   final VoidCallback onBack;
-  final ColorScheme cs;
 
   const _ReaderTopBar({
     required this.chapterKey,
@@ -370,148 +365,25 @@ class _ReaderTopBar extends StatelessWidget {
     required this.totalLessons,
     required this.lesson,
     required this.onBack,
-    required this.cs,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: false,
-      child: Container(
-        decoration: BoxDecoration(
-          color: cs.surface,
-          border: Border(bottom: BorderSide(color: cs.outline)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                  KuberSpacing.md, KuberSpacing.sm, KuberSpacing.md, KuberSpacing.sm),
-              child: Row(
-                children: [
-                  _ChipButton(
-                    icon: Icons.chevron_left_rounded,
-                    onTap: onBack,
-                    cs: cs,
-                  ),
-                  const SizedBox(width: KuberSpacing.sm),
-                  Expanded(
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => showChapterNavSheet(
-                        context,
-                        initialChapterKey: chapterKey,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  chapterName,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: cs.primary,
-                                    letterSpacing: -0.2,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: 2),
-                              Icon(
-                                Icons.expand_more_rounded,
-                                size: 14,
-                                color: cs.primary,
-                              ),
-                            ],
-                          ),
-                          Text(
-                            'Lesson ${lessonIndex + 1} of $totalLessons',
-                            style: GoogleFonts.jetBrainsMono(
-                              fontSize: 11,
-                              color: cs.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: KuberSpacing.sm),
-                  GestureDetector(
-                    onTap: () {
-                      showLessonInfoSheet(
-                        context,
-                        lesson: lesson,
-                        chapterKey: chapterKey,
-                        chapterName: chapterName,
-                        lessonNum: lessonIndex + 1,
-                        totalLessons: totalLessons,
-                      );
-                    },
-                    child: Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: cs.outline),
-                        borderRadius:
-                            BorderRadius.circular(KuberRadius.md),
-                      ),
-                      child: Icon(
-                        Icons.info_outline_rounded,
-                        size: 18,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Progress bar
-            TweenAnimationBuilder<double>(
-              tween: Tween<double>(
-                begin: 0,
-                end: (lessonIndex + 1) / totalLessons,
-              ),
-              duration: const Duration(milliseconds: 240),
-              curve: Curves.easeOut,
-              builder: (_, value, _) => LinearProgressIndicator(
-                value: value,
-                minHeight: 2,
-                backgroundColor: cs.surfaceContainerHigh,
-                valueColor: AlwaysStoppedAnimation(cs.primary),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ChipButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final ColorScheme cs;
-
-  const _ChipButton({required this.icon, required this.onTap, required this.cs});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          border: Border.all(color: cs.outline),
-          borderRadius: BorderRadius.circular(KuberRadius.md),
-        ),
-        child: Icon(icon, size: 20, color: cs.onSurface),
+    return ReaderHeader(
+      title: chapterName,
+      subtitle: 'Lesson ${lessonIndex + 1} of $totalLessons',
+      progress: (lessonIndex + 1) / totalLessons,
+      onBack: onBack,
+      onTitleTap: () =>
+          showChapterNavSheet(context, initialChapterKey: chapterKey),
+      infoLabel: 'Lesson info',
+      onInfo: () => showLessonInfoSheet(
+        context,
+        lesson: lesson,
+        chapterKey: chapterKey,
+        chapterName: chapterName,
+        lessonNum: lessonIndex + 1,
+        totalLessons: totalLessons,
       ),
     );
   }
